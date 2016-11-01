@@ -80,6 +80,7 @@ Wide는 모든 노드에서 작업을 모아서 연산을 수행하기 때문에
 **Mesos - Master에 Spark 설치**
 ```
 https://spark.apache.org/downloads.html
+wget http://d3kbcqa49mib13.cloudfront.net/spark-2.0.1-bin-hadoop2.7.tgz
 Spark이 설치된  /home/nkh/spark-2.0.0-bin-hadoop2.7/conf 폴더에서 spark-env.sh.template -> spark-env.sh로 복사
 
 복사된 spark-env.sh파일에 아래 두 개를  설정
@@ -91,9 +92,12 @@ Spark을  다운 받아 Mesos Slave에서 실행 할 수 있도록 설정
 export SPARK_EXECUTOR_URI=http://130.211.188.2:9914/spark-2.0.0-bin-hadoop2.7.tgz
 
 ```
+![spark](https://github.com/namgunghyeon/wiki/blob/master/images/spark/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-02%20%EC%98%A4%EC%A0%84%2012.09.25.png?raw=true)
+
 **Spark실행**
 ```
 Client Mode
+~/spark-2.0.1-bin-hadoop2.7/bin
 bash pyspark --master mesos://10.128.0.2:5050 <- 내부 주소 말고 외부 주소를 사용하면 제대로 동작하지 않음. 다른 설정이 있는지 확인이 필요.
 ```
 ![spark](https://github.com/namgunghyeon/wiki/blob/master/images/spark/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-10-30%20%EC%98%A4%ED%9B%84%2010.05.55.png?raw=true)
@@ -108,25 +112,66 @@ http://130.211.188.2:4040/executors/
 ![spark](https://github.com/namgunghyeon/wiki/blob/master/images/spark/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-10-30%20%EC%98%A4%ED%9B%84%2010.06.07.png?raw=true)
 
 **cluster-mode**
-```
 마스터에서 메소스 디스패쳐 실행
+```
+~/spark-2.0.1-bin-hadoop2.7/sbin
 bash start-mesos-dispatcher.sh --master mesos://10.128.0.2:5050
 
+디스패처를 실행시키면 아래와 같이 spark-submit으로 받을 수 있도록 서버를 연다.
+Spark Command: /usr/lib/jvm/java-8-oracle/bin/java -cp starting org.apache.spark.deploy.mesos.MesosClusterDispatcher, logging to /home/mesos-master-1/spark-2.0.1-bin-hadoop2.7/logs/spark-mesos-master-1-org.apache.spark.deploy.mesos.MesosClusterDispatcher-1-mesos-master-1.out
+mesos-master-1@mesos-master-1:~/spark-2.0.1-bin-hadoop2.7/sbin$ tail -f /home/mesos-master-1/spark-2.0.1-bin-hadoop2.7/logs/spark-mesos-master-1-org.apache.spark.deploy.mesos.MesosClusterDispatcher-1-mesos-master-1.out
+16/10/05 08:00:29 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users  with view permissions: Set(mesos-master-1); groups with view permissions: Set(); users  with modify permissions: Set(mesos-master-1); groups with modify permissions: Set()
+16/10/05 08:00:29 INFO Utils: Successfully started service on port 8081.
+16/10/05 08:00:29 INFO MesosClusterUI: Bound MesosClusterUI to 0.0.0.0, and started at http://10.0.2.15:8081
+I1005 08:00:29.956048 15739 sched.cpp:226] Version: 1.0.1
+I1005 08:00:29.959381 15736 sched.cpp:330] New master detected at master@192.168.56.101:5050
+I1005 08:00:29.959638 15736 sched.cpp:341] No credentials provided. Attempting to register without authentication
+I1005 08:00:29.960786 15736 sched.cpp:743] Framework registered with 56f0b494-020b-4ef5-99d6-cd36ed1fdccc-0003
+16/10/05 08:00:29 INFO MesosClusterScheduler: Registered as framework ID 56f0b494-020b-4ef5-99d6-cd36ed1fdccc-0003
+16/10/05 08:00:29 INFO Utils: Successfully started service on port 7077.
+16/10/05 08:00:29 INFO MesosRestServer: Started REST server for submitting applications on port 7077
+```
+
+
 클러스터 모드 실행
+```
 다른 서버에서 스팍을 설치 후 spark-submit으로 프로그램 제출
 /home/nkh/spark-2.0.0-bin-hadoop2.7/bin/spark-submit \
 --class org.apache.spark.examples.SparkPi \
 --master mesos://10.128.0.2:7077 \
 --deploy-mode cluster \
 http://130.211.188.2:9914/cluster-test.py    <- 실행해야할 파일 python -m SimpleHTTPServer 9914 띄워서 사용
+
+위 내용은 GCE에서 실행했던 부분
+아래 내용은 virtualbox에서 실행
+
+/home/mesos-master-3/spark-2.0.1-bin-hadoop2.7/bin/spark-submit \
+--class org.apache.spark.examples.SparkPi --master mesos://192.168.56.101:7077 --deploy-mode cluster \ http://192.168.56.106:9914/test.py
+
+
 ```
 
-![spark](https://github.com/namgunghyeon/wiki/blob/master/images/spark/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-10-30%20%EC%98%A4%ED%9B%84%2010.06.14.png?raw=true)
+![spark](https://github.com/namgunghyeon/wiki/blob/master/images/spark/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-02%20%EC%98%A4%EC%A0%84%2012.45.42.png?raw=true)
 
 https://github.com/namkunghyeon/python_spark
 
-## TODO
-GCE에서 했던 사용했던 부분을 VirtualBox로 다시해보기
+
+***중요***
+```
+--master mesos://192.168.56.101:7077 커넥션이 안되는 경우 netstat -pln로 7077포트가 정상적으로 아이피에 바인딩되어 있는지 확인
+tcp6       0      0 192.168.56.101:7077     :::*                    LISTEN      15852/java
+아래 처럼 되어 있다면
+tcp6       0      0 127.0.1.1:7077     :::*                    LISTEN      15852/java
+
+vi /etc/hosts에서
+127.0.1.1      mesos-master-1 해당 부분 삭제
+
+정상적이라면 아래 처럼 기록이 되어 있어야함.
+192.168.56.101  mesos-master-1
+192.168.56.102  mesos-master-2
+192.168.56.103  mesos-master-3
+
+```
 
 **출처 :
 http://ourcstory.tistory.com/124
