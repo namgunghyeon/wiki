@@ -7,6 +7,9 @@ HDFS에 저장하는 파일은 특정 크기의 블록으로 나누어저 분산
 
 ### 네임노드와 데이터 노드
 HDFS는 마스터 - 슬레이브 아키텍쳐로 마스터서버는 네임노드이며, 슬레이브 서버는 데이터 노드이다.
+![hadoop](https://github.com/namgunghyeon/wiki/blob/master/images/hadoop/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-03%20%EC%98%A4%EC%A0%84%2012.19.53.png?raw=true)
+![hadoop](https://github.com/namgunghyeon/wiki/blob/master/images/hadoop/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-03%20%EC%98%A4%EC%A0%84%2012.04.01.png?raw=true)
+[hadoop architecture](http://hadoop.apache.org/docs/r1.2.1/hdfs_design.html)
 
 
 ### 네임 노드
@@ -33,7 +36,12 @@ HDFS는 마스터 - 슬레이브 아키텍쳐로 마스터서버는 네임노드
 
 ***-파일 저장 요청***
 
+![hadoop](https://github.com/namgunghyeon/wiki/blob/master/images/hadoop/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-03%20%EC%98%A4%EC%A0%84%2012.08.52.png?raw=true)
+
 클라이언트가 HDFS에 파일을 저장하는 경우 파일을 저장하기 위한 스트림을 생성해야한다. 클라이언트가 네임노드와 통신 과정을 통해 파일 저장용 스트림 객체를 생성한다.
+```
+다른 책에서는 DataNode에 Write가 완료되면 NameNode에 저장 결과 알림을 전달한다고 되어 있다.
+```
 
 ***-패킷 전송***
 
@@ -42,8 +50,11 @@ HDFS는 마스터 - 슬레이브 아키텍쳐로 마스터서버는 네임노드
 ***-파일 닫기***
 
 ***-파일 조회 요청***
+![hadoop](https://github.com/namgunghyeon/wiki/blob/master/images/hadoop/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-03%20%EC%98%A4%EC%A0%84%2012.09.57.png?raw=true)
 
 #### 보조 네임노드
+![hadoop](https://github.com/namgunghyeon/wiki/blob/master/images/hadoop/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-03%20%EC%98%A4%EC%A0%84%2012.10.17.png?raw=true)
+
 네임노드는 메타 데이터를 메모리에 처리한다. 하지만 메모리에만 데이터를 유지할 경우 서버가 재부팅될 경우 모든 메타데이터가 유실 될 수 있다. HDFS는 이러한 문제를 극복하기 위해서 editlog와 fsimage라는 두개의 파일을 생성한다.
 
 editlog는 HDFS의 모든 변경 이력을 저장한다. HDFS는 클라이언트가 파일을 저장하거나, 삭제허간, 혹은 파일을 이동하는 경우 editlog와 메모리에 로딩돼 있는 메타데이터에 기록한다. fsimage는 메모리에 저장된 메타데이터의 파일 시스템 이미지를 저장한 파일이다.
@@ -252,4 +263,6 @@ http://gh0stsp1der.tistory.com/66
 http://crazia.tistory.com/entry/HADOOP-%ED%95%98%EB%91%A1-Hadoop-260-%EC%84%A4%EC%B9%98#recentTrackback
 http://inthound.blogspot.kr/2015/04/how-to-install-hadoop-260-in-ubuntu.html
 http://datamining.dongguk.ac.kr/hadoop/
-http://rocksea.tistory.com/282***
+http://rocksea.tistory.com/282
+http://www.slideshare.net/Raze2dust/hadooparchitecture-110910130636phpapp01
+http://blog.bigdataweek.com/2016/08/01/hadoop-important-handling-big-data/***
