@@ -74,8 +74,7 @@ Buffer(option)
 ***Tag***:각 로그 레코드는 Tag를 통해서 로그의 종류가 정해지는데, 이 Tag에 따라서 로그에 대한 필터링, 라우팅과 같은 플러그인에 적용된다.
 
 ### 3.설치 및 테스트
-
-
+![flunentd](https://github.com/namgunghyeon/wiki/blob/master/images/fluentd/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-04%20%EC%98%A4%EC%A0%84%2012.09.17.png?raw=true)
 
 **설치**
 Ubuntu 14.04
@@ -125,6 +124,117 @@ Usage: td-agent [options]
     -g, --gemfile GEMFILE            Gemfile path
     -G, --gem-path GEM_INSTALL_PATH  Gemfile install path (default: $(dirname $gemfile)/vendor/bundle)
 fluentd-01@ubuntu:/var/log/td-agent$
+```
+**설정 파일**
+설정에 대한 기본 내용이 있다.
+```
+/etc/td-agent/td-agent.conf
+####
+## Output descriptions:
+##
+# Treasure Data (http://www.treasure-data.com/) provides cloud based data
+# analytics platform, which easily stores and processes data from td-agent.
+# FREE plan is also provided.
+# @see http://docs.fluentd.org/articles/http-to-td
+#
+# This section matches events whose tag is td.DATABASE.TABLE
+<match td.*.*>
+  @type tdlog
+  apikey YOUR_API_KEY
+
+  auto_create_table
+  buffer_type file
+  buffer_path /var/log/td-agent/buffer/td
+
+  <secondary>
+    @type file
+    path /var/log/td-agent/failed_records
+  </secondary>
+</match>
+
+## match tag=debug.** and dump to console
+<match debug.**>
+  @type stdout
+</match>
+
+####
+## Source descriptions:
+##
+
+## built-in TCP input
+## @see http://docs.fluentd.org/articles/in_forward
+<source>
+  @type forward
+</source>
+
+## built-in UNIX socket input
+#<source>
+#  @type unix
+#</source>
+
+# HTTP input
+# POST http://localhost:8888/<tag>?json=<json>
+# POST http://localhost:8888/td.myapp.login?json={"user"%3A"me"}
+# @see http://docs.fluentd.org/articles/in_http
+<source>
+  @type http
+  port 8888
+</source>
+
+## live debugging agent
+<source>
+  @type debug_agent
+  bind 127.0.0.1
+  port 24230
+</source>
+
+####
+## Examples:
+##
+
+## File input
+## read apache logs continuously and tags td.apache.access
+#<source>
+#  @type tail
+#  format apache
+#  path /var/log/httpd-access.log
+#  tag td.apache.access
+#</source>
+
+## File output
+## match tag=local.** and write to file
+#<match local.**>
+#  @type file
+#  path /var/log/td-agent/access
+#</match>
+
+## Forwarding
+## match tag=system.** and forward to another td-agent server
+#<match system.**>
+#  @type forward
+#  host 192.168.0.11
+#  # secondary host is optional
+#  <secondary>
+#    host 192.168.0.12
+#  </secondary>
+#</match>
+
+## Multiple output
+## match tag=td.*.* and output to Treasure Data AND file
+#<match td.*.*>
+#  @type copy
+#  <store>
+#    @type tdlog
+#    apikey API_KEY
+#    auto_create_table
+#    buffer_type file
+#    buffer_path /var/log/td-agent/buffer/td
+#  </store>
+#  <store>
+#    @type file
+#    path /var/log/td-agent/td-%Y-%m-%d/%H.log
+#  </store>
+#</match>
 ```
 
 **Input Plugins**
