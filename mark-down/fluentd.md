@@ -77,6 +77,74 @@ Buffer(option)
 
 
 
+**설치**
+Ubuntu 14.04
+```
+http://docs.fluentd.org/articles/install-by-deb
+
+For Trusty,
+curl -L https://toolbelt.treasuredata.com/sh/install-ubuntu-trusty-td-agent2.sh | sh
+
+실행
+sudo /etc/init.d/td-agent restart
+
+sudo /etc/init.d/td-agent start
+sudo /etc/init.d/td-agent stop
+sudo /etc/init.d/td-agent restart
+sudo /etc/init.d/td-agent status
+
+```
+
+```
+fluentd-01@ubuntu:/var/log/td-agent$ td-agent -h
+Usage: td-agent [options]
+    -s, --setup [DIR=/etc/td-agent]  install sample configuration file to the directory
+    -c, --config PATH                config file path (default: /etc/td-agent/td-agent.conf)
+        --dry-run                    Check fluentd setup is correct or not
+        --show-plugin-config=PLUGIN  Show PLUGIN configuration and exit(ex: input:dummy)
+    -p, --plugin DIR                 add plugin directory
+    -I PATH                          add library path
+    -r NAME                          load library
+    -d, --daemon PIDFILE             daemonize fluent process
+        --no-supervisor              run without fluent supervisor
+        --user USER                  change user
+        --group GROUP                change group
+    -o, --log PATH                   log file path
+    -i CONFIG_STRING,                inline config which is appended to the config file on-fly
+        --inline-config
+        --emit-error-log-interval SECONDS
+                                     suppress interval seconds of emit error logs
+        --suppress-repeated-stacktrace [VALUE]
+                                     suppress repeated stacktrace
+        --without-source             invoke a fluentd without input plugins
+        --use-v1-config              Use v1 configuration format (default)
+        --use-v0-config              Use v0 configuration format
+    -v, --verbose                    increase verbose level (-v: debug, -vv: trace)
+    -q, --quiet                      decrease verbose level (-q: warn, -qq: error)
+        --suppress-config-dump       suppress config dumping when fluentd starts
+    -g, --gemfile GEMFILE            Gemfile path
+    -G, --gem-path GEM_INSTALL_PATH  Gemfile install path (default: $(dirname $gemfile)/vendor/bundle)
+fluentd-01@ubuntu:/var/log/td-agent$
+```
+
+**Input Plugins**
+- in_tail
+- in_http
+- in_exec
+- in_syslog
+- in_forward
+
+
+**Output Plogins**
+- out_stdout(Non-Buffered)
+- out_file
+- **out_forward**
+
+
+**Formatter**
+- csv, tsv, ltsv
+
+
 ***출처:
 http://www.popit.kr/%EC%95%84%ED%8C%8C%EC%B9%98-%EC%8B%A4%EC%8B%9C%EA%B0%84-%EC%B2%98%EB%A6%AC-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EB%B9%84%EA%B5%90%EB%B6%84%EC%84%9D-1/
 http://system-server-engineer.tistory.com/32
