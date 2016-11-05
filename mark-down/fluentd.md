@@ -464,6 +464,15 @@ root@ubuntu:/etc/td-agent# tail -f /var/log/td-agent/td-agent.log
 **Formatter**
 - csv, tsv, ltsv
 
+### 4.Example code
+**python**
+[python_fluentd](https://github.com/namgunghyeon/python_fluentd_example)
+
+**node**
+
+
+
+
 **자세한 설정 내용은 아래에서 확인할 수 있다.**
 http://docs.fluentd.org/articles/input-plugin-overview
 
