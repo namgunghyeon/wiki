@@ -336,10 +336,130 @@ http://localhost:8888/<tag> tag부분을 변경해서 로그를 구분해서 받
 
 
 **Output Plogins**
-- out_stdout(Non-Buffered)
-- out_file
-- **out_forward**
 
+![fluentd](https://github.com/namgunghyeon/wiki/blob/master/images/fluentd/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-05%20%EC%98%A4%ED%9B%84%201.19.37.png?raw=true)
+
+- out_stdout(Non-Buffered)
+```ruby
+<match **>
+  type stdout
+</match>
+```
+
+- out_file(Time Sliced)
+```ruby
+<source>
+  @type exec
+  command echo "test message"
+  tag test.message
+  keys message
+  run_interval 10s
+</source>
+
+<match **>
+  @type file
+  path /home/fluentd-01/logs/
+  time_slice_format %Y%m%d%H%M
+  time_slice_wait 10s
+</match>
+
+root@ubuntu:/home/fluentd-01/logs# tail -f .201611040203.b5406887eb763bfb9
+2016-11-04T02:03:04+09:00	test.message	{"message":"test message"}
+2016-11-04T02:03:14+09:00	test.message	{"message":"test message"}
+2016-11-04T02:03:24+09:00	test.message	{"message":"test message"}
+2016-11-04T02:03:34+09:00	test.message	{"message":"test message"}
+2016-11-04T02:03:44+09:00	test.message	{"message":"test message"}
+2016-11-04T02:03:54+09:00	test.message	{"message":"test message"}
+
+drwxrwxr-x 2 td-agent   td-agent   4096 Nov  4 02:03 ./
+drwxr-xr-x 4 fluentd-01 fluentd-01 4096 Nov  4 02:01 ../
+-rw-r--r-- 1 td-agent   td-agent    786 Nov  4 02:01 .201611040201.b5406883bf2c007f4
+-rw-r--r-- 1 td-agent   td-agent    786 Nov  4 02:02 .201611040202.b540688457b1e0608
+-rw-r--r-- 1 td-agent   td-agent    132 Nov  4 02:03 .201611040203.b5406887eb763bfb9
+-rwx------ 1 td-agent   td-agent    260 Nov  4 01:26 message.log*
+-rw-r--r-- 1 td-agent   td-agent      0 Nov  4 01:52 out_file.log
+-rwx------ 1 td-agent   td-agent     68 Nov  4 02:01 pos_file.pos*
+
+
+```
+
+- **out_forward**
+```ruby
+
+보내는 쪽
+<source>
+  @type exec
+  command echo "test server 1 message"
+  tag test.message
+  keys message
+  run_interval 10s
+</source>
+
+<match **>
+  @type forward
+  buffer_type file
+  buffer_path /home/fluentd-01/logs/
+  flush_interval 30s
+
+  <server>
+    name tset.sever.com
+    host 192.168.56.118
+    port 24224
+  </server>
+</match>
+
+<source>
+  @type exec
+  command echo "test server 2 message"
+  tag test.message
+  keys message
+  run_interval 10s
+</source>
+
+<match **>
+  @type forward
+  buffer_type file
+  buffer_path /home/fluentd-02/logs/
+  flush_interval 30s
+
+  <server>
+    name tset.sever.com
+    host 192.168.56.118
+    port 24224
+  </server>
+</match>
+
+
+받는 쪽
+<source>
+  @type forward
+  port 24224
+</source>
+
+<match **>
+  @type stdout
+</match>
+
+받는 쪽 서버 로그
+root@ubuntu:/etc/td-agent# tail -f /var/log/td-agent/td-agent.log
+2016-11-04 02:18:54 +0900 test.message: {"message":"test server 1 message"}
+2016-11-04 02:19:04 +0900 test.message: {"message":"test server 1 message"}
+2016-11-04 02:19:14 +0900 test.message: {"message":"test server 1 message"}
+2016-11-04 02:19:24 +0900 test.message: {"message":"test server 1 message"}
+2016-11-04 02:19:34 +0900 test.message: {"message":"test server 1 message"}
+2016-11-04 02:19:44 +0900 test.message: {"message":"test server 1 message"}
+2016-11-04 02:19:54 +0900 test.message: {"message":"test server 1 message"}
+2016-11-04 02:19:43 +0900 test.message: {"message":"test server 2 message"}
+2016-11-04 02:19:53 +0900 test.message: {"message":"test server 2 message"}
+2016-11-04 02:20:03 +0900 test.message: {"message":"test server 2 message"}
+2016-11-04 02:20:04 +0900 test.message: {"message":"test server 1 message"}
+2016-11-04 02:20:14 +0900 test.message: {"message":"test server 1 message"}
+2016-11-04 02:20:24 +0900 test.message: {"message":"test server 1 message"}
+2016-11-04 02:20:13 +0900 test.message: {"message":"test server 2 message"}
+2016-11-04 02:20:23 +0900 test.message: {"message":"test server 2 message"}
+2016-11-04 02:20:33 +0900 test.message: {"message":"test server 2 message"}
+
+```
 
 **Formatter**
 - csv, tsv, ltsv
