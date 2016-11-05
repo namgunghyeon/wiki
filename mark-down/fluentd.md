@@ -127,7 +127,7 @@ fluentd-01@ubuntu:/var/log/td-agent$
 ```
 **설정 파일**
 설정에 대한 기본 내용이 있다.
-```
+```ruby
 /etc/td-agent/td-agent.conf
 ####
 ## Output descriptions:
@@ -237,10 +237,100 @@ fluentd-01@ubuntu:/var/log/td-agent$
 #</match>
 ```
 
+
+
 **Input Plugins**
 - in_tail
+```ruby
+<source>
+  @type tail
+  path /home/fluentd-01/logs/message.log
+  pos_file /home/fluentd-01/logs/pos_file.pos <- 현재까지 읽은 포지션 저장
+  tag test.message
+  format none
+</source>
+
+<match **>
+  type stdout
+</match>
+
+
+root@ubuntu:/home/fluentd-01/logs# ls
+message.log  pos_file.pos
+root@ubuntu:/home/fluentd-01/logs# echo "namkunghyeon" >> message.log
+root@ubuntu:/home/fluentd-01/logs# echo "namkunghyeon" >> message.log
+root@ubuntu:/home/fluentd-01/logs# echo "namkunghyeon" >> message.log
+root@ubuntu:/home/fluentd-01/logs# echo "namkunghyeon" >> message.log
+root@ubuntu:/home/fluentd-01/logs# echo "namkunghyeon" >> message.log
+root@ubuntu:/home/fluentd-01/logs# echo "namkunghyeon" >> message.log
+
+2016-11-04 01:23:53 +0900 [info]: following tail of /home/fluentd-01/logs/message.log
+2016-11-04 01:23:53 +0900 test.message: {"message":"namkunghyeon"}
+2016-11-04 01:24:13 +0900 test.message: {"message":"namkunghyeon"}
+2016-11-04 01:24:15 +0900 test.message: {"message":"namkunghyeon"}
+2016-11-04 01:24:15 +0900 test.message: {"message":"namkunghyeon"}
+2016-11-04 01:24:16 +0900 test.message: {"message":"namkunghyeon"}
+
+```
+
 - in_http
+```ruby
+<source>
+  @type http
+  port 8888
+  bind 0.0.0.0
+  body_size_limit 32m
+  keepalive_timeout 10s
+</source>
+
+2016-11-04 01:30:41 +0900 [info]: following tail of /home/fluentd-01/logs/message.log
+2016-11-04 01:31:24 +0900 test.tag.here: {"action":"login","user":2}
+2016-11-04 01:31:25 +0900 test.tag.here: {"action":"login","user":2}
+2016-11-04 01:31:26 +0900 test.tag.here: {"action":"login","user":2}
+2016-11-04 01:31:27 +0900 test.tag.here: {"action":"login","user":2}
+2016-11-04 01:31:27 +0900 test.tag.here: {"action":"login","user":2}
+2016-11-04 01:31:27 +0900 test.tag.here: {"action":"login","user":2}
+2016-11-04 01:31:28 +0900 test.tag.here: {"action":"login","user":2}
+
+root@ubuntu:/home/fluentd-01/logs# curl -X POST -d 'json={"action":"login","user":2}' http://localhost:8888/test.tag.here;
+root@ubuntu:/home/fluentd-01/logs# curl -X POST -d 'json={"action":"login","user":2}' http://localhost:8888/test.tag.here;
+root@ubuntu:/home/fluentd-01/logs# curl -X POST -d 'json={"action":"login","user":2}' http://localhost:8888/test.tag.here;
+root@ubuntu:/home/fluentd-01/logs# curl -X POST -d 'json={"action":"login","user":2}' http://localhost:8888/test.tag.here;
+root@ubuntu:/home/fluentd-01/logs# curl -X POST -d 'json={"action":"login","user":2}' http://localhost:8888/test.tag.here;
+root@ubuntu:/home/fluentd-01/logs# curl -X POST -d 'json={"action":"login","user":2}' http://localhost:8888/test.tag.here;
+root@ubuntu:/home/fluentd-01/logs# curl -X POST -d 'json={"action":"login","user":2}' http://localhost:8888/test.tag.here;
+
+http://localhost:8888/<tag> tag부분을 변경해서 로그를 구분해서 받을 수 있다.
+```
+
 - in_exec
+```ruby
+<source>
+  @type exec
+  command ps -ef | grep td-agent
+  tag test.message
+  run_interval 1min
+  keys k1
+</source>
+
+
+2016-11-04 01:38:12 +0900 [info]: following tail of /home/fluentd-01/logs/message.log
+2016-11-04 01:39:12 +0900 test.message: {"k1":"td-agent  3238     1  0 01:38 ?        00:00:00 /opt/td-agent/embedded/bin/ruby /usr/sbin/td-agent --log /var/log/td-agent/td-agent.log --daemon /var/run/td-agent/td-agent.pid"}
+2016-11-04 01:39:12 +0900 test.message: {"k1":"td-agent  3241  3238  0 01:38 ?        00:00:00 /opt/td-agent/embedded/bin/ruby /usr/sbin/td-agent --log /var/log/td-agent/td-agent.log --daemon /var/run/td-agent/td-agent.pid"}
+2016-11-04 01:39:12 +0900 test.message: {"k1":"fluentd+  3250  1717  0 01:38 pts/1    00:00:00 tail -f /var/log/td-agent/td-agent.log"}
+2016-11-04 01:39:12 +0900 test.message: {"k1":"td-agent  3251  3241  0 01:39 ?        00:00:00 sh -c ps -ef | grep td-agent"}
+2016-11-04 01:39:12 +0900 test.message: {"k1":"td-agent  3252  3251  0 01:39 ?        00:00:00 ps -ef"}
+2016-11-04 01:39:12 +0900 test.message: {"k1":"td-agent  3253  3251  0 01:39 ?        00:00:00 grep td-agent"}
+
+2016-11-04 01:40:13 +0900 test.message: {"k1":"td-agent  3238     1  0 01:38 ?        00:00:00 /opt/td-agent/embedded/bin/ruby /usr/sbin/td-agent --log /var/log/td-agent/td-agent.log --daemon /var/run/td-agent/td-agent.pid"}
+2016-11-04 01:40:13 +0900 test.message: {"k1":"td-agent  3241  3238  0 01:38 ?        00:00:00 /opt/td-agent/embedded/bin/ruby /usr/sbin/td-agent --log /var/log/td-agent/td-agent.log --daemon /var/run/td-agent/td-agent.pid"}
+2016-11-04 01:40:13 +0900 test.message: {"k1":"fluentd+  3250  1717  0 01:38 pts/1    00:00:00 tail -f /var/log/td-agent/td-agent.log"}
+2016-11-04 01:40:13 +0900 test.message: {"k1":"td-agent  3254  3241  0 01:40 ?        00:00:00 sh -c ps -ef | grep td-agent"}
+2016-11-04 01:40:13 +0900 test.message: {"k1":"td-agent  3255  3254  0 01:40 ?        00:00:00 ps -ef"}
+2016-11-04 01:40:13 +0900 test.message: {"k1":"td-agent  3256  3254  0 01:40 ?        00:00:00 grep td-agent"}
+
+```
+
 - in_syslog
 - in_forward
 
@@ -254,6 +344,8 @@ fluentd-01@ubuntu:/var/log/td-agent$
 **Formatter**
 - csv, tsv, ltsv
 
+**자세한 설정 내용은 아래에서 확인할 수 있다.**
+http://docs.fluentd.org/articles/input-plugin-overview
 
 ***출처:
 http://www.popit.kr/%EC%95%84%ED%8C%8C%EC%B9%98-%EC%8B%A4%EC%8B%9C%EA%B0%84-%EC%B2%98%EB%A6%AC-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EB%B9%84%EA%B5%90%EB%B6%84%EC%84%9D-1/
