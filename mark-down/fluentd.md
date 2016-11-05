@@ -469,9 +469,7 @@ root@ubuntu:/etc/td-agent# tail -f /var/log/td-agent/td-agent.log
 [python_fluentd](https://github.com/namgunghyeon/python_fluentd_example)
 
 **node**
-
-
-
+[nodejs-fluentd](https://github.com/namgunghyeon/nodejs_fluentd_example)
 
 **자세한 설정 내용은 아래에서 확인할 수 있다.**
 http://docs.fluentd.org/articles/input-plugin-overview
