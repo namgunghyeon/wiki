@@ -103,7 +103,14 @@ conf/tajo-site.xml 설정
 </property>
 
 </configuration>
+
 ```
+- tajo.rootdir: 타조의 데이터 파일을 저장할 디렉터리입니다. 기본값은 로컬 파일의 시스템의 /tmp 디렉터리로 설정되므로, 반드시 타조가 사용하는 HDFS의 네임스페이스(core-site.xml 의 fs.defaultFS 속성값)를 등록해야 합니다.
+- tajo.master.umbilical-rpc.address: TajoMaser의 RPC 서버로 사용하는 주소입니다.
+- tajo.master.client-rpc.address: TajoMaser의 RPC 클라이언트가 사용하는 주소입니다.
+- tajo.resource-tracker.rpc.address:  타조의 리소스트래커가 사용하는 RPC 주소입니다.
+- tajo.catalog.client-rpc.address: 타조의 카탈로그 클라이언트가 사용하는 RPC 주소입니다.
+- tajo.worker.resource.dfs-dir-aware: 이 값이 true로 설정될 경우, 하둡의 dfs.datanode.data.dir 속성에 정의된 디스크 목록을 로딩한 후, TajoWorker가 사용할 수 있는 디스크 개수(tajo.worker.resource.disks)로 인식하게 됩니다.
 
 conf/workers
 ```
@@ -131,6 +138,7 @@ scp tajo.tar.gz tajo@hadoop-slave-03:/home/tajo
 
 Tajo master web UI: http://192.168.56.107:26080
 Tajo Client Service: 192.168.56.107:26002
+![tajo](https://github.com/namgunghyeon/wiki/blob/master/images/tajo/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-06%20%EC%98%A4%ED%9B%84%206.20.09.png?raw=true)
 
 
 tsql 실행
