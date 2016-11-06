@@ -3,19 +3,28 @@
 Cassandra는 Scalability와 High Avaliablility에 최적화된 대표적인 분산형 Data Storeage이다. Consistent hashing을 이용한 Ring 구조와 Gossip Protocol을 구현했으며, 각 노드 장비들의 추가, 제거 등이 자유롭고, 데이터 센터까지 고려 할 수 있는 데이터 복제 정책을 사용하여 안정성 축면에서 많은 장점이 있다.
 하지만 Join이나 Transaction을 지원하지 않고, Index등의 검색을 위한 기능도 매우 단출한다. Keyspace나 Table등을 과도하게 생성할 경우 Memory Overflow가 발생할 수 있음을 고려해야한다.
 
+![cassandra](https://github.com/namgunghyeon/wiki/blob/master/images/cassandra/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-06%20%EC%98%A4%ED%9B%84%2010.51.57.png?raw=true)
+
 
 ## 2.구조
 
 Partition Key데이터의 hash값을 기준으로 Data를 분산한다. 처음 각 노드가 Ring에 참여하면 Cassandra의 conf/cassandra.yaml에 정의된 각 설정을 통해 각 노드마다 고유의 Hash 범위를 부여 받는다. Read/Write요청이 오면 Partition Key를 통해서 Hash값을 계산해 데이터가 어느 노드에 있는지 알고 접근할 수 있다. 계산된 Hash값을 Token이라고 부른다.
 
+
+
+![cassandra](https://github.com/namgunghyeon/wiki/blob/master/images/cassandra/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-06%20%EC%98%A4%ED%9B%84%2011.39.58.png?raw=true)
 초창기의 Cassandra Data Structure는 **Keyspace > Column Family > Row > Column(Column Name + Column Value)** 형태로 구성되어 있었다.
 Keyspace와 Column Family에 대한 정보는 모든 Cassandra Node의 메모리에 저장된다
 
+
+
+![cassandra](https://github.com/namgunghyeon/wiki/blob/master/images/cassandra/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-06%20%EC%98%A4%ED%9B%84%2011.40.02.png?raw=true)
 Cassandra 1.2에서는  **Keyspace > Table > Row > Column(Column Name + Column Value)** 로 변경이 되었다.
 
+![cassandra](https://github.com/namgunghyeon/wiki/blob/master/images/cassandra/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-06%20%EC%98%A4%ED%9B%84%2011.32.18.png?raw=true)
 
-
-여기에서의 Row와 Column은 Cassandra Data Layer의 Row와 Column을 의미하지 않는다.
+**CQL은 이를 있는 그대로 표현하지 않고 한 단계 추상화해 표현한다.**
+위의 CQL Table에서 Row와 Column은 실제 데이터가 저장되는 Cassandra Data Layer의 Row, Column과는 의미가 다르다. CQL에서는 RDBMS의 Tuple, Attribute와 유사한 테이블의 행과 열의 의미와 가깝다.
 
 **Keyspace**
 
@@ -27,11 +36,13 @@ Cassandra 1.2에서는  **Keyspace > Table > Row > Column(Column Name + Column V
 
 **Virtual Node**
 Cassandra에 Data를 CURD를 진행하고. 해당 데이터는 Partition Key로 지정된 Column의 Value가 Row Key가 되고 이 Row Key를 Hashing하여 Token을 계산한 뒤, 해당 Token의 범위에 속한 Node를 찾아 CURD를 진행한다. 각 노드별 Token의 범위가 할당되어 있어야한다.
+![cassandra](https://github.com/namgunghyeon/wiki/blob/master/images/cassandra/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-06%20%EC%98%A4%ED%9B%84%2011.12.34.png?raw=true)
 
 하나의 노드에서 연속한 3개의 Toekn범위에 대한 저장 의무를 가진다.
 
-Cassandra 1.2부터 Virtual Node라는 기능이 추가되었다.
+![cassandra](https://github.com/namgunghyeon/wiki/blob/master/images/cassandra/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-06%20%EC%98%A4%ED%9B%84%2011.14.13.png?raw=true)
 
+Cassandra 1.2부터 Virtual Node라는 기능이 추가되었다.
 
 하나의 노드의 옵션에서 설정한 만큼 다수개의 가상노드와 가상노드 각각이 정해진 Token범위에 대한 저장 의무를 가진다.
 Cassandra 노드안에 가상 노드를 여러개 두고, 아주 잘게 나누어진 token 범위를 가상 노드들에게 할당하여 데이터를 분산하는 개념 Virtual Node을 두어서 데이터를 좀 더 균일하게 분산하고 여러곳에 분산되어 있어 노드의 추가, 제거시 데이터의 이동, 복제, 리밸런싱에 높은 성능향상을 가져다 준다.
@@ -57,6 +68,8 @@ Primary Key는 최소 1개 이상이 Partition Key와 0개 이상의 Cluster Key
 
 ##### Composite Partition Key
 Composite partition Key는 2개 이상의 다수의 CQL Column으로 이루어진 Partition Key를 의미한다.
+
+작업중
 
 
 **출처:
