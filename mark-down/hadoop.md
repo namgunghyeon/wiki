@@ -79,11 +79,17 @@ java
 java version "1.8.0_111"
 ```
 
+Hadoop 계정 생성
+```
+adduser hadoop
+su - hadoop
+```
+
 SSH Key등록
 ```
 한 노드에서 다른 노드를 접속할 때 패스워드를 입력하지 않도록 하기 위해서 모든 노드에 SSH key를 등록한다.
 ssh-keygen -t rsa 키 생성
-cat ~/id_rsa.pub >> ~/.ssh/authorized_keys  공개키 등록
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys  공개키 등록
 scp로 모든 도느에 .ssh경로 아래에 id_rsa.pub, authorized_keys 파일을 복사한다.
 ssh로 다른 서버에 접속할 때 패스워드 없이 접속이 가능해야 한다.
 ```
@@ -237,9 +243,10 @@ sbin/start-dfs.sh
 sbin/start-yarn.sh
 
 ```
-
+http://192.168.56.107:50070
 아래 이미지 처럼 Live Nodes가 NameNode에 맞게 나와야 정상
 ![hadoop](https://github.com/namgunghyeon/wiki/blob/master/images/hadoop/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-10-23%20%EC%98%A4%EC%A0%84%204.11.37.png?raw=true)
+
 
 네임노드가 정상적으로 UI화면에 나오지 않을 때
 ```
@@ -258,6 +265,82 @@ http://gh0stsp1der.tistory.com/66
 맵리듀스 프로그래밍 모델은 맵과 리듀스라는 두 가지 단계로 데이터를 처리한다. 맵을 입력 파일을 한 줄씩 읽어서 데이터를 변형하며, 리듀스는 맵의 결과 데이터를 집계한다.
 
 작성중
+
+## 4.Hadoop 명령어
+기본 형태
+~/hadoop-2.7.3/bin
+hadoop fs -<명령어>
+
+```
+bash hadoop fs -ls /
+drwxr-xr-x   - tajo supergroup          0 2016-10-22 21:53 /movielens
+drwxr-xr-x   - tajo supergroup          0 2016-10-22 21:40 /tajo
+drwxr-xr-x   - tajo supergroup          0 2016-10-22 21:40 /tmp
+```
+
+```
+bash hadoop fs -count /
+          20            9           24887031 /
+```
+```
+bash hadoop fs -du /
+24765439  /movielens
+104905    /tajo
+16687     /tmp
+```
+
+```
+하둡에서 자주 사용하는 명령어는 다음과 같다.
+* 폴더의 용량을 확인할 때 count 를 사용
+* 파일의 내용을 확인할 때는 cat 보다는 text를 사용하면 더 좋다. 파일 타입을 알아서 판단하기 때문
+
+hadoop fs -cat [경로]
+    - 경로의 파일을 읽어서 보여줌
+    - 리눅스 cat 명령과 동리함
+
+hadoop fs -count [경로]
+    - 경로상의 폴더, 파일, 파일사이즈를 보여줌
+
+hadoop fs -cp [소스 경로] [복사 경로]
+    - hdfs 상에서 파일 복사
+
+hadoop fs -df /user/hadoop
+    - 디스크 공간 확인
+
+hadoop fs -du /user/hadoop
+    - 파일별 사이즈 확인
+
+hadoop fs -dus /user/hadoop
+    - 폴더의 사이즈 확인
+
+hadoop fs -get [소스 경로] [로컬 경로]
+    - hdfs 의 파일 로컬로 다운로드
+
+hadoop fs -ls [소스 경로]
+    - 파일 목록 확인
+
+hadoop fs -mkdir [생성 폴더 경로]
+    - 폴더 생성
+
+hadoop fs -put [로컬 경로] [소스 경로]
+    - 로컬의 파일 hdfs 상으로 복사
+
+hadoop fs -rm [소스 경로]
+    - 파일 삭제, 폴더는 삭제 안됨
+
+hadoop fs -rmr [소스 경로]
+    - 폴더 삭제
+
+hadoop fs -setrep [값] [소스 경로]
+    - hdfs 의 replication 값 수정
+
+hadoop fs -text [소스 경로]
+    - 파일의 정보를 확인하여 텍스트로 반환
+    - gz, lzo 같은 형식을 확인후 반환해줌
+```
+참고
+ https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/FileSystemShell.html#count
+
 
 ***출처:
 http://crazia.tistory.com/entry/HADOOP-%ED%95%98%EB%91%A1-Hadoop-260-%EC%84%A4%EC%B9%98#recentTrackback
