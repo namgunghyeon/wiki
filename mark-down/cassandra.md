@@ -69,7 +69,38 @@ Primary Key는 최소 1개 이상이 Partition Key와 0개 이상의 Cluster Key
 ##### Composite Partition Key
 Composite partition Key는 2개 이상의 다수의 CQL Column으로 이루어진 Partition Key를 의미한다.
 
-작업중
+## 4.Cassandra Read/Write/Delete/Update
+**Write**
+Cassandra에서 최초의 노드를 Coordinator노드라고 부른다. Coordinator노드는 Row Key를 Hashing해 어느 노드들에 데이터를 Write해야하는지 확인을 한다. 그리고 Consistency Level에 따라서 몇 개의 노드에 Write를 해야하는지 참고해 현재 데이터를 Write해야 할 노드들의 status가 정상인지를 확인한다. 특정 노드가 정상적이지 않다면 Consistency Level에 따라 hint hand off라는 로컬 임시 저장공강에 Write할 데이터를 저장한다. 정상적으로 돌아오면 다시 Coordinator노드가 data를 Write해주기 위해서이다.
+
+데이터를 저장하게 될 노드는 Write요청이 오면 혹시 모를 장애에 대비해 Commitlog라고 불리는 로컬 디스크의 파일에 기록을 남긴다. 그리고 Mem Table이라는 이름의 메모리 저장공에 데이터를 Wirte한 뒤, 성공 메시지를 돌려줘 Wirte의 요청을 마무리한다.
+Mem Table에 데이터가 충분히 쌓이면 디스크 버전의 Mem Table인 "SSTable"에 데이터를 Flush한다. SSTable은 Immutable하며, Sequential하다는 특징을 가지고 있으며 Cassandra는 이러한 다수의  SSTable을 Compaction해 데이터를 관리한다.
+
+**Read**
+Read요청이 오면 Coordinator 노드는 해당 요청의  Row Key를 Hashing해 접근해야할 노드의 위치를 파악한 뒤, Consistency Level를 체크해 몇 개의 Replication을 확인해야 할지 결정한다. 그리고 Coordinator노드는 데이터가 있는 가장 가까운 노드에 Data Request를 요청하고, 그다음 가까운 노드들에는 Data Digest Reqeust를 요청한다. 이러게 가져온 데이터를 비교해 정보가 일치하지 않으면 일치 하지 않은 데이터들의 노드로부터 Full Data를 가져와 그중 가장 최신 데이터를 사용자에게 돌려준다. 그리고 최신 데이터를 기준으로 나머지 노드들의 데이터를 수리한다.
+
+1.Mem Table를 확인한다.
+2.Bloom Filter를 확인한다.
+ - Bloom Filter란 긍정 오류는 발생할 수 있지만, 부정 오류는 발생하지 않는 확률적인 자료구조, 없는걸 있다고 거짓말 할 수는 있지만 있는걸 없다고 하지 않는다.
+
+3.Index를 확인한다.
+  - 메모리에 저장되어 있는 Summery Index를 통해서 디스크에 저장되어 있는 원본 Index를 확인하여 SSTable 내의 DATA 위치에 대한 offset을 알게된다.
+
+**Delete**
+ Cassandra는 바로 Delete를 하지 않고 모든 데이터는 Tombstone이라는 marker가 존재하고, 해당 Tombstone에 마킹을 하고 주기적인 GC, SSTable의 Compaction에 의해서 삭제가 된다.
+
+**Update**
+Cassandras는 SSTable이 Immutable하기 때문에 Update는 Delete -> Insert 작업으로 이루어 진다.
+
+
+## 5.주의 사항
+**Delete**
+
+**Secondary Index**
+
+**Memory Orverflow**
+Cassandra는 모든 Keyspace와 Table에 대한 Metadata를 JVM 메모리에 올려 놓고 사용하고 있고 이것은 분산 되지 않고 Ring를 구성하는 모든 노드가 동이랗게 가지고 있는 데이터이다. 많은 Keyspace와 Table를 사용할 경우 메모리를 급격하게 소진할 수 있다.
+
 
 
 **출처:
