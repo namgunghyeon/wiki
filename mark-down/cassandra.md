@@ -27,12 +27,16 @@ Cassandra 1.2에서는  **Keyspace > Table > Row > Column(Column Name + Column V
 위의 CQL Table에서 Row와 Column은 실제 데이터가 저장되는 Cassandra Data Layer의 Row, Column과는 의미가 다르다. CQL에서는 RDBMS의 Tuple, Attribute와 유사한 테이블의 행과 열의 의미와 가깝다.
 
 **Keyspace**
+논리적인 Data 저장소
 
 **Table**
+다수의 Row로 구성
 
 **Row**
+Key-Value로 이루어진 Column으로 구성
 
 **Column**
+저장할 데이터
 
 **Virtual Node**
 Cassandra에 Data를 CURD를 진행하고. 해당 데이터는 Partition Key로 지정된 Column의 Value가 Row Key가 되고 이 Row Key를 Hashing하여 Token을 계산한 뒤, 해당 Token의 범위에 속한 Node를 찾아 CURD를 진행한다. 각 노드별 Token의 범위가 할당되어 있어야한다.
@@ -71,15 +75,22 @@ Composite partition Key는 2개 이상의 다수의 CQL Column으로 이루어�
 
 ## 4.Cassandra Read/Write/Delete/Update
 **Write**
+![cassandra](https://github.com/namgunghyeon/wiki/blob/master/images/cassandra/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-08%20%EC%98%A4%EC%A0%84%201.18.43.png?raw=true)
 Cassandra에서 최초의 노드를 Coordinator노드라고 부른다. Coordinator노드는 Row Key를 Hashing해 어느 노드들에 데이터를 Write해야하는지 확인을 한다. 그리고 Consistency Level에 따라서 몇 개의 노드에 Write를 해야하는지 참고해 현재 데이터를 Write해야 할 노드들의 status가 정상인지를 확인한다. 특정 노드가 정상적이지 않다면 Consistency Level에 따라 hint hand off라는 로컬 임시 저장공강에 Write할 데이터를 저장한다. 정상적으로 돌아오면 다시 Coordinator노드가 data를 Write해주기 위해서이다.
 
+![cassandra](https://github.com/namgunghyeon/wiki/blob/master/images/cassandra/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-08%20%EC%98%A4%EC%A0%84%201.23.45.png?raw=true)
 데이터를 저장하게 될 노드는 Write요청이 오면 혹시 모를 장애에 대비해 Commitlog라고 불리는 로컬 디스크의 파일에 기록을 남긴다. 그리고 Mem Table이라는 이름의 메모리 저장공에 데이터를 Wirte한 뒤, 성공 메시지를 돌려줘 Wirte의 요청을 마무리한다.
 Mem Table에 데이터가 충분히 쌓이면 디스크 버전의 Mem Table인 "SSTable"에 데이터를 Flush한다. SSTable은 Immutable하며, Sequential하다는 특징을 가지고 있으며 Cassandra는 이러한 다수의  SSTable을 Compaction해 데이터를 관리한다.
 
 **Read**
+![cassandra](https://github.com/namgunghyeon/wiki/blob/master/images/cassandra/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-08%20%EC%98%A4%EC%A0%84%201.26.55.png?raw=true)
+
 Read요청이 오면 Coordinator 노드는 해당 요청의  Row Key를 Hashing해 접근해야할 노드의 위치를 파악한 뒤, Consistency Level를 체크해 몇 개의 Replication을 확인해야 할지 결정한다. 그리고 Coordinator노드는 데이터가 있는 가장 가까운 노드에 Data Request를 요청하고, 그다음 가까운 노드들에는 Data Digest Reqeust를 요청한다. 이러게 가져온 데이터를 비교해 정보가 일치하지 않으면 일치 하지 않은 데이터들의 노드로부터 Full Data를 가져와 그중 가장 최신 데이터를 사용자에게 돌려준다. 그리고 최신 데이터를 기준으로 나머지 노드들의 데이터를 수리한다.
 
+![cassandra](https://github.com/namgunghyeon/wiki/blob/master/images/cassandra/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-08%20%EC%98%A4%EC%A0%84%201.27.03.png?raw=true)
+
 1.Mem Table를 확인한다.
+
 2.Bloom Filter를 확인한다.
  - Bloom Filter란 긍정 오류는 발생할 수 있지만, 부정 오류는 발생하지 않는 확률적인 자료구조, 없는걸 있다고 거짓말 할 수는 있지만 있는걸 없다고 하지 않는다.
 
@@ -95,13 +106,24 @@ Cassandras는 SSTable이 Immutable하기 때문에 Update는 Delete -> Insert �
 
 ## 5.주의 사항
 **Delete**
+![cassandra](https://github.com/namgunghyeon/wiki/blob/master/images/cassandra/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-08%20%EC%98%A4%EC%A0%84%201.52.02.png?raw=true)
+
+Read성능
+MemTable이나 SSTable의 데이터를 삭제 했더라도 Tombstone이 Marking되어있을 뿐 실제로는 Compaction이 발생전 까지 디스크에 존재 데이터를 Read할 때 순서대로 읽기 때문에 삭제 마킹이 되어도 읽고 지나간다.
 
 **Secondary Index**
+Range쿼리을 사용할 수 없음.
 
 **Memory Orverflow**
 Cassandra는 모든 Keyspace와 Table에 대한 Metadata를 JVM 메모리에 올려 놓고 사용하고 있고 이것은 분산 되지 않고 Ring를 구성하는 모든 노드가 동이랗게 가지고 있는 데이터이다. 많은 Keyspace와 Table를 사용할 경우 메모리를 급격하게 소진할 수 있다.
 
+## 6.설치
+설치
+https://www.digitalocean.com/community/tutorials/how-to-install-cassandra-and-run-a-single-node-cluster-on-ubuntu-14-04
+멀티 노드
+https://www.digitalocean.com/community/tutorials/how-to-run-a-multi-node-cluster-database-with-cassandra-on-ubuntu-14-04
 
+작성 중
 
 **출처:
 http://meetup.toast.com/posts/58**
