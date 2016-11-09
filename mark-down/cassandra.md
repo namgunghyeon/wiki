@@ -118,12 +118,117 @@ Range쿼리을 사용할 수 없음.
 Cassandra는 모든 Keyspace와 Table에 대한 Metadata를 JVM 메모리에 올려 놓고 사용하고 있고 이것은 분산 되지 않고 Ring를 구성하는 모든 노드가 동이랗게 가지고 있는 데이터이다. 많은 Keyspace와 Table를 사용할 경우 메모리를 급격하게 소진할 수 있다.
 
 ## 6.설치
-설치
-https://www.digitalocean.com/community/tutorials/how-to-install-cassandra-and-run-a-single-node-cluster-on-ubuntu-14-04
-멀티 노드
-https://www.digitalocean.com/community/tutorials/how-to-run-a-multi-node-cluster-database-with-cassandra-on-ubuntu-14-04
+자바 설치
+```bash
+sudo add-apt-repository ppa:webupd8team/java
+sudo apt-get update
+sudo apt-get install oracle-java8-set-default
+java -version
+```
 
-작성 중
+Cassandra 설치
+```bash
+echo "deb http://www.apache.org/dist/cassandra/debian 22x main" | sudo tee -a /etc/apt/sources.list.d/cassandra.sources.list
+echo "deb-src http://www.apache.org/dist/cassandra/debian 22x main" | sudo tee -a /etc/apt/sources.list.d/cassandra.sources.list
+
+gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D
+gpg --export --armor F758CE318D77295D | sudo apt-key add -
+
+gpg --keyserver pgp.mit.edu --recv-keys 2B5C1B00
+gpg --export --armor 2B5C1B00 | sudo apt-key add -
+
+gpg --keyserver pgp.mit.edu --recv-keys 0353B12C
+gpg --export --armor 0353B12C | sudo apt-key add -
+
+sudo apt-get update
+
+sudo apt-get install cassandra
+```
+
+Cassandra 연결
+```bash
+상태 확인
+sudo nodetool status
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address    Load       Tokens       Owns (effective)  Host ID                               Rack
+UN  127.0.0.1  97.11 KB   256          100.0%            77e8d23b-3e0d-45da-8700-e631113a40b9  rack1
+
+
+접속
+cqlsh
+Connected to Test Cluster at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 2.2.8 | CQL spec 3.3.1 | Native protocol v4]
+Use HELP for help.
+cqlsh> exit
+
+```
+
+Host 설정
+```bash
+vi /etc/hosts
+192.168.56.119 cassandra01
+192.168.56.200 cassandra02
+```
+
+Cassandra Cluster
+```bash
+sudo service cassandra stop
+sudo rm -rf /var/lib/cassandra/data/system/*
+
+sudo vi /etc/cassandra/cassandra.yaml
+
+cluster_name: 'CassandraDOCluster'
+
+seed_provider:
+  - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+    parameters:
+         - seeds: "your_server_ip,your_server_ip_2,...your_server_ip_n"
+
+listen_address: your_server_ip
+rpc_address: your_server_ip
+endpoint_snitch: GossipingPropertyFileSnitch
+
+파일 맨 마지막에 추가
+auto_bootstrap: false
+
+#  - GossipingPropertyFileSnitch
+#    This should be your go-to snitch for production use.  The rack
+#    and datacenter for the local node are defined in
+#    cassandra-rackdc.properties and propagated to other nodes via
+#    gossip.  If cassandra-topology.properties exists, it is used as a
+
+sudo service cassandra start
+sudo nodetool status
+Datacenter: dc1
+===============
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address         Load       Tokens       Owns (effective)  Host ID                               Rack
+UN  192.168.56.200  159.65 KB  256          100.0%            87da18e8-a977-4316-8261-048972cbfa16  rack1
+UN  192.168.56.119  149.7 KB   256          100.0%            77e8d23b-3e0d-45da-8700-e631113a40b9  rack1
+
+```
+
+Cassandra 접속
+```bash
+cqlsh cassandra02 9042
+Connected to Test Cluster at cassandra02:9042.
+[cqlsh 5.0.1 | Cassandra 2.2.8 | CQL spec 3.3.1 | Native protocol v4]
+Use HELP for help.
+cqlsh> exit
+
+cqlsh cassandra01 9042
+Connected to Test Cluster at cassandra01:9042.
+[cqlsh 5.0.1 | Cassandra 2.2.8 | CQL spec 3.3.1 | Native protocol v4]
+Use HELP for help.
+cqlsh>
+```
+
+간단하게 Cassandra를 설치할 수 있다.
 
 **출처:
-http://meetup.toast.com/posts/58**
+http://meetup.toast.com/posts/58
+https://www.digitalocean.com/community/tutorials/how-to-run-a-multi-node-cluster-database-with-cassandra-on-ubuntu-14-04https://www.digitalocean.com/community/tutorials/how-to-install-cassandra-and-run-a-single-node-cluster-on-ubuntu-14-04**
