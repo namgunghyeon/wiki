@@ -5,6 +5,8 @@
 Zookeeper는 Hadoop의 서브 프로젝트로 시작되었다. Hadoop에서 돌아가는 HDFS(Hadoop Distributed File System)이나 HBase같은 어플리케이션의 분산 처리를 제어할 때 Zookeeper를 사용한다.
 코디네이션 서비스는 분산 시스템 내에서 중요한 상태 정보나 설정 정보등을 유지하기 때문에 서비스의 장애는 전체 시스템의 장애를 유발하기 때문에, 이중화등을 통하여 고가용성을 제공해야 한다. Zookeeper는 이러한 특성을 잘 제공하고 있어, 유명한 분산 솔루션에 많이 사용되고 있다.
 
+![zookeeper](https://raw.githubusercontent.com/namgunghyeon/wiki/8e2fa9bebaffb848c7018f399a1a4533fd502990/images/zookeeper/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-14%20%EC%98%A4%EC%A0%84%202.53.58.png)
+
 ## 2.구조
 디렉토리 구조 기반으로 znode라는 데이터 저장 객체를 제공하고 Key-Value 이 객체에 데이타를 넣고 빼는 기능함 제공한다. 디렉토리 형식을 사용하기 때문에 데이터를 계층화된 구조로 저장하기 용이하다.
 
@@ -36,9 +38,10 @@ Watch 기능은 ZooKeeper 클라이언트가 특정 znode에 watch를 걸어 놓
 신뢰성 : 한번 업데이트가 적용되면, 이것은 클라이언트가 업데이트를 덮어 쓰기 전까지 지속된다.
 적시성 : 시스템의 클라이언트 시각적 관점은 특정 시간 내에 처리 될 수 있도록 보장한다.
 
+![zookeeper](https://raw.githubusercontent.com/namgunghyeon/wiki/8e2fa9bebaffb848c7018f399a1a4533fd502990/images/zookeeper/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-14%20%EC%98%A4%EC%A0%84%202.54.04.png)
+
 **Zookeeper 앙상블**
 분산 작업을 제어하기 위해 사용되는 만큼 Zookeeper 서버가 중단되면 ZooKeeper에 의존하는 모든 서버가 영향을 받는다. 따라서 Zookeeper는 최대한 정상 동작을 보장해야 한다. Zookeeper 서버를 클러스터링해 고가용성을 지원하도록 설정한다. Zookeeper클러스터를 앙상블이라고 부른다.
-
 
 앙상블로 묶인 ZooKeeper 서버중 한 대는 쓰기 명령을 총괄하는 리더 역활을 수행하고, 나머지는 팔로어 역활을 수행한다. 클라이언트에서 Zookeeper 앙상블에 연결할 때는 커넥션 문자열에 앙상블을 구성하는 Zookeeper서버 주소를 다수 포함할 수 있다. 클라이언트는 커넥션 문자열이 포함된 Zookeeper 주소중 하나에 접근하여 세션을 맺는다.
 
@@ -46,6 +49,8 @@ Watch 기능은 ZooKeeper 클라이언트가 특정 znode에 watch를 걸어 놓
 
 ## 3.설치
 VirtaulBox로 3대 설치
+![zookeeper](https://raw.githubusercontent.com/namgunghyeon/wiki/8e2fa9bebaffb848c7018f399a1a4533fd502990/images/zookeeper/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-14%20%EC%98%A4%EC%A0%84%202.54.11.png)
+
 다운
 http://zookeeper.apache.org, http://www.apache.org/dyn/closer.cgi/zookeeper/, http://apache.mirror.cdnetworks.com/zookeeper/stable/  
 현재 안정버전 : zookeeper-3.4.9.tar.gz
