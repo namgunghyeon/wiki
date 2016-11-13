@@ -281,10 +281,256 @@ score값이 같을 경우 값을 비교해서 정렬한다. memcmp함수를 사�
 127.0.0.1:6379> PFCOUNT hll
 (integer) 3
 ```
+## 4.Replication
+master : read/write
+slave : read
 
-## 4.HA
+master : 192.168.56.203(7000)
+slave : 192.168.56.204(7001), 192.168.56.205(7002), 192.168.56.206(7003)
 
-## 5.Cluster
+```
+설정
+/home/ubuntu/redis-3.2.5/src
+
+utils폴더에 있는 install_server 파일을 통해서 config 파일 생성
+ubuntu@ubuntu:~/redis-3.2.5/utils$  sudo ./install_server.sh
+[sudo] password for ubuntu:
+Welcome to the redis service installer
+This script will help you easily set up a running redis server
+
+Please select the redis port for this instance: [6379] 7000(master), 7001(slave), 7002(slave), 7003(slave)
+Please select the redis config file name [/etc/redis/7003.conf]
+Selected default - /etc/redis/7003.conf
+Please select the redis log file name [/var/log/redis_7003.log]
+Selected default - /var/log/redis_7003.log
+Please select the data directory for this instance [/var/lib/redis/7003]
+Selected default - /var/lib/redis/7003
+Please select the redis executable path [] /home/ubuntu/redis-3.2.5/src
+Selected config:
+Port           : 7003
+Config file    : /etc/redis/7003.conf
+Log file       : /var/log/redis_7003.log
+Data dir       : /var/lib/redis/7003
+Executable     : /home/ubuntu/redis-3.2.5/src
+Cli Executable : /home/ubuntu/redis-3.2.5/redis-cli
+Is this ok? Then press ENTER to go on or Ctrl-C to abort.
+Copied /tmp/7003.conf => /etc/init.d/redis_7003
+Installing service...
+
+sudo vi /etc/redis/7000.conf <- master
+bind 192.168.56.203
+masterauth testserver
+requirepass testserver
+
+sudo vi /etc/redis/7000.conf <- slave
+bind 192.168.56.204
+slaveof 192.168.56.203 7000
+masterauth testserver
+requirepass testserver
+repl-ping-slave-period 10
+repl-timeout 60
+
+나머지 slave파일도 bind만 빼고 동일하게 수정
+
+
+
+sudo ./redis-server /etc/redis/7000.conf
+sudo ./redis-server /etc/redis/7001.conf
+sudo ./redis-server /etc/redis/7002.conf
+sudo ./redis-server /etc/redis/7003.conf
+
+10995:M 12 Nov 20:19:44.963 # WARNING: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128.
+10995:M 12 Nov 20:19:44.963 # Server started, Redis version 3.2.5
+10995:M 12 Nov 20:19:44.963 # WARNING overcommit_memory is set to 0! Background save may fail under low memory condition. To fix this issue add 'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot or run the command 'sysctl vm.overcommit_memory=1' for this to take effect.
+10995:M 12 Nov 20:19:44.963 # WARNING you have Transparent Huge Pages (THP) support enabled in your kernel. This will create latency and memory usage issues with Redis. To fix this issue run the command 'echo never > /sys/kernel/mm/transparent_hugepage/enabled' as root, and add it to your /etc/rc.local in order to retain the setting after a reboot. Redis must be restarted after THP is disabled.
+10995:M 12 Nov 20:19:44.963 * The server is now ready to accept connections on port 7000
+10995:M 12 Nov 20:20:50.998 * Slave 192.168.56.204:7001 asks for synchronization
+10995:M 12 Nov 20:20:50.999 * Full resync requested by slave 192.168.56.204:7001
+10995:M 12 Nov 20:20:50.999 * Starting BGSAVE for SYNC with target: disk
+10995:M 12 Nov 20:20:51.000 * Background saving started by pid 11008
+11008:C 12 Nov 20:20:51.005 * DB saved on disk
+11008:C 12 Nov 20:20:51.006 * RDB: 6 MB of memory used by copy-on-write
+10995:M 12 Nov 20:20:51.075 * Background saving terminated with success
+10995:M 12 Nov 20:20:51.076 * Synchronization with slave 192.168.56.204:7001 succeeded
+10995:M 12 Nov 20:20:53.279 * Slave 192.168.56.205:7002 asks for synchronization
+10995:M 12 Nov 20:20:53.279 * Full resync requested by slave 192.168.56.205:7002
+10995:M 12 Nov 20:20:53.280 * Starting BGSAVE for SYNC with target: disk
+10995:M 12 Nov 20:20:53.280 * Background saving started by pid 11009
+11009:C 12 Nov 20:20:53.286 * DB saved on disk
+11009:C 12 Nov 20:20:53.287 * RDB: 6 MB of memory used by copy-on-write
+10995:M 12 Nov 20:20:53.386 * Background saving terminated with success
+10995:M 12 Nov 20:20:53.386 * Synchronization with slave 192.168.56.205:7002 succeeded
+10995:M 12 Nov 20:20:54.899 * Slave 192.168.56.206:7003 asks for synchronization
+10995:M 12 Nov 20:20:54.900 * Full resync requested by slave 192.168.56.206:7003
+10995:M 12 Nov 20:20:54.900 * Starting BGSAVE for SYNC with target: disk
+10995:M 12 Nov 20:20:54.901 * Background saving started by pid 11010
+11010:C 12 Nov 20:20:54.908 * DB saved on disk
+11010:C 12 Nov 20:20:54.909 * RDB: 6 MB of memory used by copy-on-write
+10995:M 12 Nov 20:20:54.995 * Background saving terminated with success
+10995:M 12 Nov 20:20:54.995 * Synchronization with slave 192.168.56.206:7003 succeeded
+
+접속
+ubuntu@ubuntu:~/redis-3.2.5/src$ sudo ./redis-cli -h 192.168.56.203 -p 7000 -a testserver
+192.168.56.203:7000> keys *
+(empty list or set)
+192.168.56.203:7000> set testkey testvalue
+OK
+192.168.56.203:7000>
+
+slave에서 확인
+ubuntu@ubuntu:~/redis-3.2.5/src$ sudo ./redis-cli -h 192.168.56.204 -p 7001 -a testserver
+192.168.56.204:7001> keys *
+1) "testkey"
+
+```
+
+
+## 5.Sentinel
+
+master : 192.168.56.203(7000)
+slave : 192.168.56.204(7001), 192.168.56.205(7002), 192.168.56.206(7003)
+sentinel : 192.168.56.204(8000), 192.168.56.205(8001), 192.168.56.206(8002)
+```
+설정
+/home/ubuntu/redis-3.2.5/src
+sential : 192.168.56.204(8000), 192.168.56.205(8001), 192.168.56.206(8002)
+sudo cp sentinel.conf /etc/redis/sentinel8000.conf
+sudo cp sentinel.conf /etc/redis/sentinel8001.conf
+sudo cp sentinel.conf /etc/redis/sentinel8002.conf
+
+vi /etc/redis/sentinel8000.conf
+port 8000
+bind 192.168.56.204
+sentinel myid 92e14e2c3180c1571f3bd1cca3c561067cf15ce5
+sentinel monitor stn-master 192.168.56.206 7003 2
+sentinel down-after-milliseconds stn-master 2000
+sentinel failover-timeout stn-master 90000
+sentinel auth-pass stn-master testserver
+
+위와 같이 설정 후 모든 sentinel 서버에 복사 포트 번호와 아이피를 각 서버에 맞게 수정
+
+
+실행
+sudo ./redis-sentinel /etc/redis/sentinel8000.conf
+sudo ./redis-sentinel /etc/redis/sentinel8001.conf
+sudo ./redis-sentinel /etc/redis/sentinel8002.conf
+
+
+
+1846:X 13 Nov 20:22:06.613 * Increased maximum number of open files to 10032 (it was originally set to 1024).
+                _._
+           _.-``__ ''-._
+      _.-``    `.  `_.  ''-._           Redis 3.2.5 (00000000/0) 64 bit
+  .-`` .-```.  ```\/    _.,_ ''-._
+ (    '      ,       .-`  | `,    )     Running in sentinel mode
+ |`-._`-...-` __...-.``-._|'` _.-'|     Port: 8000
+ |    `-._   `._    /     _.-'    |     PID: 1846
+  `-._    `-._  `-./  _.-'    _.-'
+ |`-._`-._    `-.__.-'    _.-'_.-'|
+ |    `-._`-._        _.-'_.-'    |           http://redis.io
+  `-._    `-._`-.__.-'_.-'    _.-'
+ |`-._`-._    `-.__.-'    _.-'_.-'|
+ |    `-._`-._        _.-'_.-'    |
+  `-._    `-._`-.__.-'_.-'    _.-'
+      `-._    `-.__.-'    _.-'
+          `-._        _.-'
+              `-.__.-'
+
+1846:X 13 Nov 20:22:06.618 # WARNING: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128.
+1846:X 13 Nov 20:22:06.618 # Sentinel ID is 92e14e2c3180c1571f3bd1cca3c561067cf15ce5
+1846:X 13 Nov 20:22:06.619 # +monitor master stn-master 192.168.56.206 7003 quorum 2
+1846:X 13 Nov 20:22:06.620 * +slave slave 192.168.56.205:7002 192.168.56.205 7002 @ stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:22:06.626 * +slave slave 192.168.56.204:7001 192.168.56.204 7001 @ stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:22:06.632 * +slave slave 192.168.56.203:7000 192.168.56.203 7000 @ stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:22:16.013 * +sentinel sentinel a67ff97d345c12c2d63270a5e6a6e66da69138e2 192.168.56.205 8001 @ stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:22:22.682 * +sentinel sentinel d123a6538a15c9c162d2d01242d109e9bc8b10b6 192.168.56.206 8002 @ stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:23:03.178 # +sdown master stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:23:03.237 # +odown master stn-master 192.168.56.206 7003 #quorum 3/2
+1846:X 13 Nov 20:23:03.238 # +new-epoch 1
+1846:X 13 Nov 20:23:03.238 # +try-failover master stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:23:03.246 # +vote-for-leader 92e14e2c3180c1571f3bd1cca3c561067cf15ce5 1
+1846:X 13 Nov 20:23:03.250 # a67ff97d345c12c2d63270a5e6a6e66da69138e2 voted for a67ff97d345c12c2d63270a5e6a6e66da69138e2 1
+1846:X 13 Nov 20:23:03.260 # d123a6538a15c9c162d2d01242d109e9bc8b10b6 voted for 92e14e2c3180c1571f3bd1cca3c561067cf15ce5 1
+
+
+ubuntu@ubuntu:~/redis-3.2.5/src$ sudo ./redis-cli -h 192.168.56.203 -p 7000 -a testserver
+192.168.56.203:7000> info replication
+# Replication
+role:master
+connected_slaves:3
+slave0:ip=192.168.56.204,port=7001,state=online,offset=75754,lag=0
+slave1:ip=192.168.56.205,port=7002,state=online,offset=75754,lag=1
+slave2:ip=192.168.56.206,port=7003,state=online,offset=75754,lag=0
+master_repl_offset:75910
+repl_backlog_active:1
+repl_backlog_size:1048576
+repl_backlog_first_byte_offset:2
+repl_backlog_histlen:75909
+
+테스트
+ubuntu@ubuntu:~$ ps -ef | grep redis
+root     10330     1  0 20:26 ?        00:00:00 ./redis-server 192.168.56.206:7003
+root     10341 10044  0 20:28 pts/2    00:00:00 sudo ./redis-sentinel /etc/redis/sentinel8002test.conf
+root     10342 10341  0 20:28 pts/2    00:00:00 ./redis-sentinel 192.168.56.206:8002 [sentinel]
+ubuntu   10451 10436  0 20:29 pts/0    00:00:00 grep --color=auto redis
+
+11846:X 13 Nov 20:23:03.322 # +elected-leader master stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:23:03.323 # +failover-state-select-slave master stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:23:03.406 # +selected-slave slave 192.168.56.204:7001 192.168.56.204 7001 @ stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:23:03.406 * +failover-state-send-slaveof-noone slave 192.168.56.204:7001 192.168.56.204 7001 @ stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:23:03.465 * +failover-state-wait-promotion slave 192.168.56.204:7001 192.168.56.204 7001 @ stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:23:04.295 # +promoted-slave slave 192.168.56.204:7001 192.168.56.204 7001 @ stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:23:04.295 # +failover-state-reconf-slaves master stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:23:04.343 * +slave-reconf-sent slave 192.168.56.203:7000 192.168.56.203 7000 @ stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:23:05.317 * +slave-reconf-inprog slave 192.168.56.203:7000 192.168.56.203 7000 @ stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:23:05.317 * +slave-reconf-done slave 192.168.56.203:7000 192.168.56.203 7000 @ stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:23:05.406 # -odown master stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:23:05.406 * +slave-reconf-sent slave 192.168.56.205:7002 192.168.56.205 7002 @ stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:23:06.382 * +slave-reconf-inprog slave 192.168.56.205:7002 192.168.56.205 7002 @ stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:23:07.414 * +slave-reconf-done slave 192.168.56.205:7002 192.168.56.205 7002 @ stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:23:07.489 # +failover-end master stn-master 192.168.56.206 7003
+1846:X 13 Nov 20:23:07.489 # +switch-master stn-master 192.168.56.206 7003 192.168.56.204 7001
+1846:X 13 Nov 20:23:07.490 * +slave slave 192.168.56.203:7000 192.168.56.203 7000 @ stn-master 192.168.56.204 7001
+1846:X 13 Nov 20:23:07.490 * +slave slave 192.168.56.205:7002 192.168.56.205 7002 @ stn-master 192.168.56.204 7001
+1846:X 13 Nov 20:23:07.491 * +slave slave 192.168.56.206:7003 192.168.56.206 7003 @ stn-master 192.168.56.204 7001
+1846:X 13 Nov 20:23:09.532 # +sdown slave 192.168.56.206:7003 192.168.56.206 7003 @ stn-master 192.168.56.204 7001
+
+
+새롭게 선출된 마스터에 접속
+ubuntu@ubuntu:~/redis-3.2.5/src$ sudo ./redis-cli -h 192.168.56.204 -p 7001 -a testserver
+192.168.56.204:7001> info replication
+# Replication
+role:master
+connected_slaves:2
+slave0:ip=192.168.56.203,port=7000,state=online,offset=9045,lag=1
+slave1:ip=192.168.56.205,port=7002,state=online,offset=9333,lag=0
+master_repl_offset:9333
+repl_backlog_active:1
+repl_backlog_size:1048576
+repl_backlog_first_byte_offset:2
+repl_backlog_histlen:9332
+192.168.56.204:7001>
+
+죽었던 마스터 재시작
+ubuntu@ubuntu:~/redis-3.2.5/src$  sudo ./redis-server /etc/redis/7003.conf
+1846:X 13 Nov 20:26:17.859 # -sdown slave 192.168.56.206:7003 192.168.56.206 7003 @ stn-master 192.168.56.204 7001
+1846:X 13 Nov 20:26:27.809 * +convert-to-slave slave 192.168.56.206:7003 192.168.56.206 7003 @ stn-master 192.168.56.204 7001
+
+ubuntu@ubuntu:~/redis-3.2.5/src$ sudo ./redis-cli -h 192.168.56.204 -p 7001 -a testserver
+192.168.56.204:7001> info replication
+# Replication
+role:master
+connected_slaves:3
+slave0:ip=192.168.56.203,port=7000,state=online,offset=46026,lag=0
+slave1:ip=192.168.56.205,port=7002,state=online,offset=46026,lag=0
+slave2:ip=192.168.56.206,port=7003,state=online,offset=46026,lag=0
+master_repl_offset:46026
+repl_backlog_active:1
+repl_backlog_size:1048576
+repl_backlog_first_byte_offset:2
+repl_backlog_histlen:46025
+
+```
 
 ## 6.Pub/Sub
 
