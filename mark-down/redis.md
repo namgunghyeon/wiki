@@ -533,6 +533,81 @@ repl_backlog_histlen:46025
 ```
 
 ## 6.Pub/Sub
+Pub/Sub 시스템에서는 채널에 구독 신청을 한 모든 subscriber에게 메시지를 전달한다. "던지는" 시스템이기 때문에 메시지를 보관하지 않는다.
+```
+ubuntu@ubuntu:~/redis-3.2.5/src$ sudo ./redis-cli -h 192.168.56.204 -p 7001 -a testserver
+192.168.56.204:7001> info replication
+# Replication
+role:master
+connected_slaves:3
+slave0:ip=192.168.56.206,port=7003,state=online,offset=155,lag=1
+slave1:ip=192.168.56.203,port=7000,state=online,offset=155,lag=1
+slave2:ip=192.168.56.205,port=7002,state=online,offset=155,lag=1
+master_repl_offset:155
+repl_backlog_active:1
+repl_backlog_size:1048576
+repl_backlog_first_byte_offset:2
+repl_backlog_histlen:154
+
+SUBSCRIBE
+^Cubuntu@ubuntu:~/redis-3.2.5/src$ sudo ./redis-cli -h 192.168.56.203 -p 7000 -a testserver
+192.168.56.203:7000> SUBSCRIBE testChannel
+Reading messages... (press Ctrl-C to quit)
+1) "subscribe"
+2) "testChannel"
+3) (integer) 1
+
+ubuntu@ubuntu:~/redis-3.2.5/src$ sudo ./redis-cli -h 192.168.56.204 -p 7001 -a testserver
+192.168.56.204:7001> SUBSCRIBE testChannel
+Reading messages... (press Ctrl-C to quit)
+1) "subscribe"
+2) "testChannel"
+3) (integer) 1
+
+^Cubuntu@ubuntu:~/redis-3.2.5/src$ sudo ./redis-cli -h 192.168.56.205 -p 7002 -a testserver
+192.168.56.205:7002> SUBSCRIBE testChannel
+Reading messages... (press Ctrl-C to quit)
+1) "subscribe"
+2) "testChannel"
+3) (integer) 1
+
+PUBLISH
+^Cubuntu@ubuntu:~/redis-3.2.5/src$ sudo ./redis-cli -h 192.168.56.204 -p 7001 -a testserver
+192.168.56.204:7001> PUBLISH testChannel "redis pub sub test"
+(integer) 1
+
+
+아래 와 같이 메시지를 받게 된다.
+^Cubuntu@ubuntu:~/redis-3.2.5/src$ sudo ./redis-cli -h 192.168.56.203 -p 7000 -a testserver
+192.168.56.203:7000> SUBSCRIBE testChannel
+Reading messages... (press Ctrl-C to quit)
+1) "subscribe"
+2) "testChannel"
+3) (integer) 1
+1) "message"
+2) "testChannel"
+3) "redis pub sub test"
+
+ubuntu@ubuntu:~/redis-3.2.5/src$ sudo ./redis-cli -h 192.168.56.204 -p 7001 -a testserver
+192.168.56.204:7001> SUBSCRIBE testChannel
+Reading messages... (press Ctrl-C to quit)
+1) "subscribe"
+2) "testChannel"
+3) (integer) 1
+1) "message"
+2) "testChannel"
+3) "redis pub sub test
+
+^Cubuntu@ubuntu:~/redis-3.2.5/src$ sudo ./redis-cli -h 192.168.56.205 -p 7002 -a testserver
+192.168.56.205:7002> SUBSCRIBE testChannel
+Reading messages... (press Ctrl-C to quit)
+1) "subscribe"
+2) "testChannel"
+3) (integer) 1
+1) "message"
+2) "testChannel"
+3) "redis pub sub test"
+```
 
 출처 :
 http://redis.io
