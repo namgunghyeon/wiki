@@ -75,7 +75,10 @@ mysql -u root -p
 ```
 
 ## 4.Replication
-Master
+
+![mysql](https://raw.githubusercontent.com/namgunghyeon/wiki/70161422c189b5ed4d14fcf9a2396ba62f427bed/images/mysql/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-15%20%EC%98%A4%ED%9B%84%2010.42.50.png)
+
+##### Master
 DML 또는 DDL과 같은 구조 및 내용 변경 등을 바이너리 로그에 기록
 ```
 DML(Data Manipulation Language)
@@ -86,7 +89,9 @@ DDL(Data Definition Language)
 CREATE , ALTER , DROP, RENAME ...
 ```
 
-Slave(read-only)
+![mysql](https://raw.githubusercontent.com/namgunghyeon/wiki/70161422c189b5ed4d14fcf9a2396ba62f427bed/images/mysql/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-15%20%EC%98%A4%ED%9B%84%2010.42.25.png)
+
+##### Slave(read-only)
 슬레이브 서버의 I/O 스레드가 마스터 서버 접속을 통해 바이너리 로그 변경 내영을 받아와 릴레이 로그에 기록하면, 슬레이브 서버의 SQL 스레드가 릴레이 로그에 기록된 변경 내역을 바탕으로 재실행해 마스터와 동일한 상태 유지
 
 
