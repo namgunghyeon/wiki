@@ -202,8 +202,188 @@ letTest()
 ```
 
 # Const
+Read Only refrence to a value
+``` javascript
+const MY_FAV = 7;
+
+MY_FAV = 20;
+console.log('MY_FAV', MY_FAV);
+
+const MY_FAV = 20; //Error
+
+let MY_FAV = 20; //Error
+
+console.log('MY_FAV', MY_FAV);
+
+```
+
 # export
+파일 또는 함수에서 외부로 노출할 때 사용
+아직 어느곳에서 구현되어 있지 않아 Babel를 사용해야 한다.
+```javascript
+export { name1, name2, …, nameN };
+export { variable1 as name1, variable2 as name2, …, nameN };
+export let name1, name2, …, nameN; // 또는 var
+export let name1 = …, name2 = …, …, nameN; // 또는 var, const
+
+export default expression;
+export default function (…) { … } // 또는 class, function*
+export default function name1(…) { … } // 또는 class, function*
+export { name1 as default, … };
+
+export * from …;
+export { name1, name2, …, nameN } from …;
+export { import1 as name1, import2 as name2, …, nameN } from …;
+
+//module "my_module.js"
+export function cube(x) {
+    return x * x * x;
+}
+
+const foo = Math.PI + Math.SQRT2;
+export { foo }
+
+
+//moduel demo.js
+import { cube, foo} from 'my_module.js';
+
+console.log(cube(3))
+console.log(foo);
+
+```
+
 # import
-# iterable protocol
-# getter, setter
-# Method definitions
+export로 노출하면 import로 다른 곳에서 사용
+import도 아직 어느곳에서 구현되어 있지 않아 Babel를 사용해야 한다.(Phyton import 와 같은 느낌)
+
+``` javascript
+import name from "module-name";
+import * as name from "module-name";
+import { member } from "module-name";
+import { member as alias } from "module-name";
+import { member1 , member2 } from "module-name";
+import { member1 , member2 as alias2 , [...] } from "module-name";
+import defaultMember, { member [ , [...] ] } from "module-name";
+import defaultMember, * as alias from "module-name";
+import defaultMember from "module-name";
+import "module-name";
+
+import * as myModule from "my-module.js";
+모듈 전체를 가져온다. 그리고 myModule이름으로 바인딩되어 사용한다.
+
+import {myMember} from "my-module.js";
+모듈 내에서 myMember 하나만 가져온다.
+
+import {foo, bar} from "my-module.js";
+모듈 내에서 foo, bar를 가져온다.
+
+import {reallyReallyLongModuleMemberName as shortName} from "my-module.js";
+reallyReallyLongModuleMemberName라는 변수를 shortName으로 별명을 지어 사용한다. (mysql AS와 같은 느낌)
+```
+
+# function*
+함수 끝에 *가 붙을 경우 Generator 객체를 반환한다.
+https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Generator
+yield 만큼 next를 사용할 수 있다.
+
+``` javascript
+
+function* name([param[, param[, ... param]]]) {
+   statements
+}
+
+function* idMaker() {
+    var index = 0;
+    while (index < 3) {
+        yield index ++;
+    }
+}
+
+var gen = idMaker()
+
+console.log(gen.next().value);
+console.log(gen.next().value);
+console.log(gen.next().value);
+console.log(gen.next().value);
+//0
+//1
+//2
+//undefined
+
+function* anotherGenerator(i) {
+    yield i + 1;
+    yield i + 2;
+    yield i + 3;
+    console.log(i)
+}
+
+function* generator(i) {
+    yield i;
+    yield* anotherGenerator(i);
+    yield i + 10;
+}
+
+var gen = generator(10);
+console.log(gen.next().value);
+//generator 아래 yield
+console.log(gen.next().value);
+console.log(gen.next().value);
+console.log(gen.next().value);
+//위 3개는 anotherGenerator에 있는 yield
+console.log(gen.next().value);
+//마지막 yield
+console.log(gen.next().value);
+
+
+function* logGenerator() {
+    console.log(yield);
+    console.log(yield);
+    console.log(yield);
+}
+
+var gen = logGenerator();
+
+gen.next();
+gen.next('pretzel');
+gen.next('california');
+gen.next('mayonnaise');
+
+```
+# for ... of
+(Array, Map, Set, String, TypedArray, arguments)
+``` javascript
+"use strict";
+let iterable = [10, 20, 30];
+
+for (let value of iterable) {
+   console.log(value);
+}
+
+for (const value of iterable) {
+   console.log(value);
+}
+
+iterable = "boo";
+for (let value of iterable) {
+   console.log(value);
+}
+
+iterable = new Uint8Array([0x00, 0xff]);
+
+for (let value of iterable) {
+   console.log(value);
+}
+
+iterable = new Map([["a", 1], ["b", 2], ["c", 3]]);
+
+for (let entry of iterable) {
+   console.log(entry);
+}
+
+iterable = new Set([1, 1, 2, 2, 3, 3]);
+//중복 없는 데이터 셋
+for (let value of iterable) {
+ console.log(value);
+}
+
+```
