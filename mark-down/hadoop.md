@@ -339,7 +339,56 @@ hadoop fs -text [소스 경로]
     - gz, lzo 같은 형식을 확인후 반환해줌
 ```
 참고
- https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/FileSystemShell.html#count
+https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/FileSystemShell.html#count
+
+
+## 5.Hadoop 2.0
+### hadoop 1의 문제점
+- **jobtracker의 단일고장점화(NameNode)**
+  - 하둡1의 jobtracker는 모든 맵리듀스 job의 실행 요청을 받아, 전체 job의 스케쥴링과 리소를 관리
+  - 클라이언트가 맵리듀스 job을 실행하기 위해서는 반드시 jobtracker가 실행 중이어야 함
+  - Jobtracker는 단일고장점(SPoF: Single Point of Failure)이 됨
+
+- **Memery ISSUE**
+  - Jobtracker는 메모리상에 전체 job의 실행 정보를 유지, 관리에 활용하여 많은 메모리 용량 소모
+  - 만일 메모리의 용량이 부족하면 job의 상태를 모니터링 할 수 없고, 새로운 job을 실행할 수 도 없음
+
+- **비효율직인 리소스 관리**
+ - 하둡 1 맵리듀스 프레임워크에서는 맵퍼와 리듀서를 따로 설정
+   - Mapper는 모두 동작하는데 Reducer는 아무 작업도 하지 않고 있을 때
+     - 전체 클러스터 입장에서는 리소스가 낭비됨
+
+### Hadoop2로 진화
+Yarn 하둡2의 핵심 시스템
+
+
+Yarn의 구성
+- **Resource Manager**
+  - golbal scheduler, 즉 마스터
+  - 전체 클러스터에서 가용한 모든 시스템 자원을 관리
+  - Application이 리소스를 요청하면 이를 적절히 분해하고 그 사용 상태를 모니터링
+  - Scheduler, Application manager, Resource tracker
+
+- **Node Manager**
+  - 슬레이브 서버의 시스템 자원을 나타내는 컨테이너들을 실행하고 이들을 모니터링
+  - 컨테이너들은 resource manager의 요청에 따라서 실행되며 하나의 슬레이브 서버에는 여러 컨테이너가 실행될 수 있음
+  - 하나의 Application을 관리하는 application master
+    - 클라이언트가 yarn에 application 실행을 요청하면
+      - application하나당 하나의 application master를 할당하며 이는 컨테이너에서 실행됨
+    - application master는 application에 필요한 리소스를 scheduling하고 node manager에 필요한 컨테이너를 요청함
+  - applcation mater, Container
+
+```
+Name Node: name node가 정상적으로 동작하지 않을 경우 모든 클라이언트가 HDFS에 접근할 수 없다. name node에 HDFS의 디렉토리 구조와 파일 위치가 모두 저장되어 있기 때문에, 이정보가 유실될 경우 데이터블록에 접근할 통로가 없어지게 된다. edit log에 문제가 발생해도 이와 비슷한 상황이 발생한다.
+
+Name Node HA: 네임노드의 이중화(Active/Standby) Shared edits: 여러 서버(저널 노드)에 복제 저장. 저널 도느는 최소 3개 이상, 홀수개로, 전체 저널 노드 중 반드시 절반 이상이 실행되어 있어야함
+
+ZKFC(zookeeper failover controller) : 네임노드 상태 모니터링, active 네임노드에 장애 발생시 standby 네임노드를 active 네임노드로 전환
+
+HDFS federation : 기존 HDFS가 단일 네임노드에 기능이 집중되는 것을 막기 위해 제안된 시스템. HDFS는 다수의 네임노드로 구성되며 각 네임노드는 독립된 네임스페이스를 관리한다. 추가적으로 HDFS는 동합된 네임스테이즈를 제공하지 않으므로 전체 네임노드의 디렉토리가 설정돼 있는 마운트 테이블을 생성해 통합된 네임스테이스를 참조할 수 있다.
+```
+
+
 
 
 ***출처:
