@@ -359,10 +359,13 @@ https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/FileSys
      - 전체 클러스터 입장에서는 리소스가 낭비됨
 
 ### Hadoop2로 진화
-Yarn 하둡2의 핵심 시스템
+![hadoop](https://raw.githubusercontent.com/namgunghyeon/wiki/4623cab531ce383000e9367902503040b0097e69/images/hadoop/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-17%20%EC%98%A4%EC%A0%84%2012.49.48.png)
 
 
-Yarn의 구성
+### Yarn의 구성
+![hadoop](https://raw.githubusercontent.com/namgunghyeon/wiki/4623cab531ce383000e9367902503040b0097e69/images/hadoop/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-17%20%EC%98%A4%EC%A0%84%2012.50.42.png)
+
+**Yarn 하둡2의 핵심 시스템**
 - **Resource Manager**
   - golbal scheduler, 즉 마스터
   - 전체 클러스터에서 가용한 모든 시스템 자원을 관리
@@ -387,6 +390,8 @@ ZKFC(zookeeper failover controller) : 네임노드 상태 모니터링, active �
 
 HDFS federation : 기존 HDFS가 단일 네임노드에 기능이 집중되는 것을 막기 위해 제안된 시스템. HDFS는 다수의 네임노드로 구성되며 각 네임노드는 독립된 네임스페이스를 관리한다. 추가적으로 HDFS는 동합된 네임스테이즈를 제공하지 않으므로 전체 네임노드의 디렉토리가 설정돼 있는 마운트 테이블을 생성해 통합된 네임스테이스를 참조할 수 있다.
 ```
+
+요즘 하둡은 데이터를 저장하는 용도로만 사용하고 Map&Reduce는 다른(Spark, Hive, Tajo ...) 프레임워크를 사용해서 활용한다.
 
 
 

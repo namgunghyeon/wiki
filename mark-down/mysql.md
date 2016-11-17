@@ -34,7 +34,7 @@ DB 이용시 연결을 위한 connection을 미리 만들어서 pool에서 저�
 ```
 1. 클라이언트는 서버로 SQL문을 전송한다.
 2. SQL문은 받은 서버는 캐시를 확인하고 캐시가 되었다면 저장결과를 반환한다. 그렇지 않다면 다음 단계로 이동
-3. 서버는 구문 분석 및 전처리기에서 쿼리에 구조적 문제가 없는지 화긴하고 옵티마이저는 SQL쿼리 최적화한다.
+3. 서버는 구문 분석 및 전처리기에서 쿼리에 구조적 문제가 없는지 확인하고 옵티마이저는 SQL쿼리 최적화한다.
 4. 쿼리 실행 엔진은 스토리지 엔진 APi를 호출하여 계획을 실행한다.
 5. 서버는 클라이언트에게 결과를 반환한다.
 ```
@@ -96,7 +96,134 @@ CREATE , ALTER , DROP, RENAME ...
 
 
 ## 5.Replication 설정
+
+Master : 192.168.56.115
+Slave : 192.168.56.207
+
+**사전 작업**
+```
+sudo vi /etc/mysql/my.cnf
+설정 파일에 [mysqld] 및에 추가
+
+## Replication related settings
+bind-address   = 192.168.56.115  <- 기존 127.0.0.0을 변경
+log-bin=mysql-bin
+server_id = 1 <- master, slave가 서로 다른 고유한 ID를 가지고 있어야 한다.
+expire_logs_days = 7
+slave_net_timeout = 60
+log_slave_updates
+```
+
+**Mysql Replication 설정 순서**
+
+1. DB유저 생성
+2. DB 마스터와 슬레이브 동기화
+    - DB Data File Copy
+    - MySQL Dump(All Lock)
+    - Export/Import(Sing Transaction)
+3. Replication 시작
+
+
+**1.유저 생성**
+user : dbrepl
+pw : dbrepl
+```
+mysql -u root -p <-master
+GRANT REPLICATION SLAVE ON *.* TO dbrepl IDENTIFIED BY 'dbrepl';
+```
+
+**2.DB 데이터 동기화**
+- DB Data File Copy
+  - DB 서버 데몬을 내린 상태에서 데이터 파일 자체를 복사
+
+- MySQL Dump(All Lock)
+  - DB전체에 READ LOCK을 걸고 데이터를 Export하는 방식
+
+- Mysql Dump(Single Transaction)
+  - 서비스 중지가 불가능하고, 테이블이 트랙잭션을 지원하는 경우에만 사용할 수 있는 방법.
+  ```
+  서버에서 데이터를 덤프하기 전에 BEGIN SQL 명령문을 실행한다. 이것은 INNODB및 BDB와 같은 트랜잭션이 되는 테이블에서만 유용하다. 그 이유는 BEGIN이 다른 어플리케이션을 블러킹하지 않은 채로 입력될 때 데이터 베이스를 일관선 있게 덤프하기 때문이다.
+  ```
+
+  ```
+  mysqldump -u root -p --single-transaction --master-data=2 --all-databases > dump.sql
+  scp dump.sql ubuntu@192.168.56.207:/home/ubuntu <-slave서버로 이동
+
+  slave에 마스터 데이터 입력
+  mysql -uroot -p --force < dump.sql
+  ```
+
+**3.Replication 시작**
+앞에서 기록해 놓은 마스터 Binlog파일과 포지션을 세팅 후 슬레이브 서버를 구동시키면 된다.
+```
+  마스터의 log파일 확인
+  mysql>  SHOW MASTER STATUS; <- master에서 실행
+    +------------------+----------+--------------+------------------+
+    | File             | Position | Binlog_Do_DB | Binlog_Ignore_DB |
+    +------------------+----------+--------------+------------------+
+    | mysql-bin.000001 |      107 |              |                  |
+    +------------------+----------+--------------+------------------+
+    mysql> CHANGE MASTER TO
+       MASTER_HOST='192.168.56.115',
+       MASTER_USER='dbrepl',
+       MASTER_PASSWORD='dbrepl',
+       MASTER_PORT=3306,
+       MASTER_LOG_FILE='mysql-bin.000001',
+       MASTER_LOG_POS=107,
+       MASTER_CONNECT_RETRY=5;
+
+    mysql> START SLAVE;
+
+    mysql> show slave status\G
+               Slave_IO_State: Waiting for master to send event
+                  Master_Host: 192.168.56.115
+                  Master_User: dbrepl
+                  Master_Port: 3306
+                Connect_Retry: 5
+              Master_Log_File: mysql-bin.000002
+          Read_Master_Log_Pos: 107
+               Relay_Log_File: mysqld-relay-bin.000003
+                Relay_Log_Pos: 253
+        Relay_Master_Log_File: mysql-bin.000002
+             Slave_IO_Running: Yes
+            Slave_SQL_Running: Yes
+              Replicate_Do_DB:
+          Replicate_Ignore_DB:
+           Replicate_Do_Table:
+       Replicate_Ignore_Table:
+      Replicate_Wild_Do_Table:
+  Replicate_Wild_Ignore_Table:
+                   Last_Errno: 0
+                   Last_Error:
+                 Skip_Counter: 0
+          Exec_Master_Log_Pos: 107
+              Relay_Log_Space: 556
+              Until_Condition: None
+               Until_Log_File:
+                Until_Log_Pos: 0
+           Master_SSL_Allowed: No
+           Master_SSL_CA_File:
+           Master_SSL_CA_Path:
+              Master_SSL_Cert:
+            Master_SSL_Cipher:
+               Master_SSL_Key:
+        Seconds_Behind_Master: 0
+Master_SSL_Verify_Server_Cert: No
+                Last_IO_Errno: 0
+                Last_IO_Error:
+               Last_SQL_Errno: 0
+               Last_SQL_Error:
+  Replicate_Ignore_Server_Ids:
+             Master_Server_Id: 1
+
+```
+위 와 같이 진행하면 마스터에 변경 사항이 있으면 슬레이브에도 반영된다.
+
+
+
+
 http://gywn.net/2012/02/mysql-replication-2/
+http://kit2013.tistory.com/157
 
 
 ### Mysql tuner
