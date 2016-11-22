@@ -65,9 +65,17 @@ Model과 View 사이의 의존성 뿐만 아니라 View와 Controller간의 의�
 
 ViewModel은 View를 나타내기 위한 Model이며, View의 Presentation logic을 담당한다.
 MVP에서 Presenter가 View와 의존 관계에 있었다면 view Model은 View와 독립적으로 이루어져 있다는 점이다.
-
+```
 각가의 View는 자신이 사용할 ViewModel을 선택할 수 있으며, ViewModel은 Model을 베이스로 Presentation Logic에 따라 서로 다르게 구현된다.
 View의 어떤 ViewModel을 연결하느냐에 따라 로직 처리가 달라지고, 각 로직 처리에 따라 Model이 변경되면 해당 ViewModel을 사용하는 View가 자동으로 업데이트 된다.
+```
+
+***
+![mvc, mvp, mvvm](https://github.com/namgunghyeon/wiki/blob/master/images/design_pattern/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-22%20%EC%98%A4%ED%9B%84%2010.06.04.png?raw=true)
+
+
+## Python Patterns
+https://github.com/faif/python-patterns
 
 
 
@@ -75,6 +83,8 @@ View의 어떤 ViewModel을 연결하느냐에 따라 로직 처리가 달라지
 예제코드
 MVC
 http://theholmesoffice.com/getting-ready-for-scalability-creating-an-mvc-framework-for-our-node-js-page/
+
+
 
 
 
