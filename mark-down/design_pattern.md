@@ -25,6 +25,7 @@
 
 
 ## MVP(Model - View - Presenter)
+![mvp](https://raw.githubusercontent.com/namgunghyeon/wiki/0bcf5f0b6a01fc69ddba7f6da3b063fbb72bacec/images/design_pattern/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-22%20%EC%98%A4%ED%9B%84%2010.01.45.png)
 
 MVC모델에서 파생된 아키텍쳐로 MVC에서 Controller를 Presenter로 변경해 Model과 View의 의존도를 없애기 위해 등장
 
@@ -47,6 +48,36 @@ Presenter는 이벤트를 바탕으로 Model을 조작하고, 그 결과를 다�
  Model과 View의 의존성은 사라졌지만 Presenter와 View 간의 1:1관계로 둘의 의존성이 매우 강해진다는 문제가 있다.
 
 
+## MVVM(Mode - View - ViewModel)
+![mvvm](https://github.com/namgunghyeon/wiki/blob/master/images/design_pattern/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-22%20%EC%98%A4%ED%9B%84%2010.00.13.png?raw=true)
+
+Model과 View 사이의 의존성 뿐만 아니라 View와 Controller간의 의존성도 고려해 Layer가 완전히 독립적으로 작성되고 테스트 될 수 있도록 설계된 패턴
+
+- Model
+  - 데이터를 가진 객체
+
+- View
+  - UI Layer
+
+- View Model
+  - View의 표현을 담당한다.
 
 
-## MVVM
+ViewModel은 View를 나타내기 위한 Model이며, View의 Presentation logic을 담당한다.
+MVP에서 Presenter가 View와 의존 관계에 있었다면 view Model은 View와 독립적으로 이루어져 있다는 점이다.
+
+각가의 View는 자신이 사용할 ViewModel을 선택할 수 있으며, ViewModel은 Model을 베이스로 Presentation Logic에 따라 서로 다르게 구현된다.
+View의 어떤 ViewModel을 연결하느냐에 따라 로직 처리가 달라지고, 각 로직 처리에 따라 Model이 변경되면 해당 ViewModel을 사용하는 View가 자동으로 업데이트 된다.
+
+
+
+
+예제코드
+MVC
+http://theholmesoffice.com/getting-ready-for-scalability-creating-an-mvc-framework-for-our-node-js-page/
+
+
+
+출처:
+http://coding-dragon.tistory.com/4
+http://geekswithblogs.net/dlussier/archive/2009/11/21/136454.aspx
