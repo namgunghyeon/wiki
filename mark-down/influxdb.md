@@ -11,10 +11,12 @@ Time-series DB는 데이터베이스 중에서도 시계열 데이터를 저장�
 - Go언어로 만들어져 있다.
 
 ## 2. 설치
+-
 https://docs.influxdata.com/influxdb/v1.1/introduction/installation/
 
 
 ## 3. Realy
+![influxdb](https://raw.githubusercontent.com/namgunghyeon/wiki/9b03177d51f0f1d64bd96e34848d618a429b11f2/images/infulxdb/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-20%20%EC%98%A4%EC%A0%84%202.14.40.png)
 
 https://github.com/influxdata/influxdb-relay/blob/master/README.md
 
