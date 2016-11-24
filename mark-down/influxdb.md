@@ -11,14 +11,74 @@ Time-series DB는 데이터베이스 중에서도 시계열 데이터를 저장�
 - Go언어로 만들어져 있다.
 
 ## 2. 설치
--
+-standalone
 https://docs.influxdata.com/influxdb/v1.1/introduction/installation/
 
+레파지토리에 추가
+```
+curl -sL https://repos.influxdata.com/influxdb.key | sudo apt-key add -
+source /etc/lsb-release
+echo "deb https://repos.influxdata.com/${DISTRIB_ID,,} ${DISTRIB_CODENAME} stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
+```
 
-## 3. Realy
+influxdb설치
+```
+sudo apt-get update && sudo apt-get install influxdb
+sudo service influxdb start
+```
+
+configuration
+```
+/etc/influxdb/influxdb.conf
+```
+
+admin page
+```
+1.1 버전부터 admin page는 deprecated
+Note: The Admin UI is deprecated as of InfluxDB 1.1 and will be removed entirely in a subsequent version.
+We recommend using Chrongraf or Grafana as a replacement.
+```
+
+cli
+```
+옵션 정보
+https://docs.influxdata.com/influxdb/v1.1/tools/shell/
+
+ubuntu@ubuntu:~$ influx
+Visit https://enterprise.influxdata.com to register for updates, InfluxDB server management, and monitoring.
+Connected to http://localhost:8086 version 1.1.0
+InfluxDB shell version: 1.1.0
+
+> show databases;
+name: databases
+name
+----
+_internal
+
+> create database test
+> show databases;
+name: databases
+name
+----
+_internal
+test
+> use test
+
+```
+
+## 3. Realy(HA구성)
 ![influxdb](https://raw.githubusercontent.com/namgunghyeon/wiki/9b03177d51f0f1d64bd96e34848d618a429b11f2/images/infulxdb/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-20%20%EC%98%A4%EC%A0%84%202.14.40.png)
 
 https://github.com/influxdata/influxdb-relay/blob/master/README.md
 
 
+
+
+
 작업 중
+
+출처 :
+http://www.cubrid.org/wiki_tools/entry/cubrid-monitoring-dashboard
+http://www.popit.kr/influxdb_telegraf_grafana_1/
+http://www.popit.kr/influxdb_telegraf_grafana_2/
+http://www.popit.kr/influxdb_telegraf_grafana_3/
