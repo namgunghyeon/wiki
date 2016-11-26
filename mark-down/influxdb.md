@@ -66,16 +66,20 @@ test
 
 ```
 
-## 3. Realy(HA구성)
+## 3.query
+https://docs.influxdata.com/influxdb/v1.1/query_language/spec/#identifiers
+
+## 4.Realy(HA구성)
 ![influxdb](https://raw.githubusercontent.com/namgunghyeon/wiki/9b03177d51f0f1d64bd96e34848d618a429b11f2/images/infulxdb/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202016-11-20%20%EC%98%A4%EC%A0%84%202.14.40.png)
 
 https://github.com/influxdata/influxdb-relay/blob/master/README.md
 
 
-
-
-
 작업 중
+
+## 5.Kapacitor
+
+
 
 출처 :
 http://www.cubrid.org/wiki_tools/entry/cubrid-monitoring-dashboard
