@@ -1,5 +1,5 @@
 # kubernetes
-## 1.kubernetes란
+## 1.kubernetes란(그리스어 배의 조타수)
 Container Orchestration툴
 구글에서 만든 Doker Orchestrator 구글 사내에서 비공개로 쓰던 Container기술(Go언어로 개발) [borg](http://research.google.com/pubs/pub43438.html)
 현재 Hot한 오픈소스
@@ -14,10 +14,10 @@ https://www.youtube.com/watch?v=EZE-aw2ndjg
 
 ### Cluster
 ### Pod
+### Minion
 ### Replication Controller
 ### Service
 ### Label
-
 
 
 작성중

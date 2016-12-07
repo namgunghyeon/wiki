@@ -121,10 +121,11 @@ bash zkCli.sh -server zookeeper01:2181
 ```
 ## 4.TEST
 Ephemeral Node모들 통해서 새로운 클라이언트가 접속하고 이를 감지하는 Watcher
-[python_zookeeper](https://github.com/namgunghyeon/python_zookeeper)
+[python_zookeeper_watcher](https://github.com/namgunghyeon/python_zookeeper/tree/master/ephemeral)
 
 ## 4.TEST_2
 Zookeeper Lock Test
+[python_zookeeper_lock](https://github.com/namgunghyeon/python_zookeeper/tree/master/lock)
 
 ***출처:
 http://bcho.tistory.com/search/Kafka
