@@ -25,7 +25,7 @@ https://www.youtube.com/watch?v=EZE-aw2ndjg
 ```
 어플리케이션 실행에 필요한 도커 컨테이너들의 집합
 ```
-### Minion
+### Minion  
 ```
 관리를 받는 노드. 도커가 설치되어 있으며 설제로 컨테이너들이 생성되는 서버
 ```
@@ -44,7 +44,37 @@ pod들을 하나의 서비스로 묶어서 외부에 제공한다.
 pod들의 그룹핑/조직화를 위해 관리하는 key-value pair/메타데이터
 ```
 
-작성중
+**설치 서버 정보**
+```
+master: 192.168.56.210
+slave-01: 192.168.56.211
+slave-02: 192.168.56.212
+```
+
+Install Go
+```
+
+```
+
+Install Doker
+```
+apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
+sh -c "echo deb https://get.docker.com/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
+apt-get update
+apt-get install -y lxc-docker git make
+source /etc/bash_completion.d/docker
+```
+
+Install etcd 2.0
+```
+curl -L  https://github.com/coreos/etcd/releases/download/v2.0.0/etcd-v2.0.0-linux-amd64.tar.gz -o etcd-v3.0.0-linux-amd64.tar.gz
+```
+
+Install Kubernetes
+
+
+
+https://devops.profitbricks.com/tutorials/getting-started-with-a-multi-node-kubernetes-cluster-on-ubuntu/
 
 출처:
 http://www.slideshare.net/tommylee98229/2-kubernetes
