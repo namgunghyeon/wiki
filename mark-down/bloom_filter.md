@@ -11,6 +11,8 @@ Hash Function은 충돌 가능성이 있어, 없는걸 있다고**(false positiv
 문제가 되는 False Positive를 조절할 수 있는 방법으로는
 해쉬 함수를 늘려 충돌을 회피한다.
 
+![image](https://github.com/namgunghyeon/wiki/blob/master/images/bloom-filter/bloom-filter_1.png?raw=true)
+
 
 **위 자료구조의 특성상 삭제는 할 수 없다**.
 
