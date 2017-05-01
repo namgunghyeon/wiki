@@ -52,9 +52,9 @@ slave-02: 192.168.56.212
 ```
 
 Install Go
-```
+[Go 설치 참고](https://github.com/namgunghyeon/wiki/wiki/InfluxDB)
 
-```
+
 
 Install Doker
 ```
@@ -66,11 +66,11 @@ source /etc/bash_completion.d/docker
 ```
 
 Install etcd 2.0
-```
-curl -L  https://github.com/coreos/etcd/releases/download/v2.0.0/etcd-v2.0.0-linux-amd64.tar.gz -o etcd-v3.0.0-linux-amd64.tar.gz
-```
+[etcd 설치 참고](https://github.com/namgunghyeon/wiki/wiki/etcd)
 
-Install Kubernetes
+Install Kubernetes(vmware 기본 디스크 8기가로는 부족)
+```
+```
 
 
 
