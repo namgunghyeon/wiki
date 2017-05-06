@@ -41,4 +41,49 @@ Ethernet, Token Ring, FDDI
 **출처:
 https://ko.wikipedia.org/wiki/OSI_%EB%AA%A8%ED%98%95
 http://blog.naver.com/PostView.nhn?blogId=demonicws&logNo=40117378644
-http://zetawiki.com/wiki/%EC%96%91%EB%B0%A9%ED%96%A5%ED%86%B5%EC%8B%A0,_%EC%A0%84%EC%9D%B4%EC%A4%91%EB%B0%A9%EC%8B%9D,_%EB%B0%98%EC%9D%B4%EC%A4%91%EB%B0%A9%EC%8B%9D,_%EB%8B%A8%EB%B0%A9%ED%96%A5%ED%86%B5%EC%8B%A0
+http://zetawiki.com/wiki/%EC%96%91%EB%B0%A9%ED%96%A5%ED%86%B5%EC%8B%A0,_%EC%A0%84%EC%9D%B4%EC%A4%91%EB%B0%A9%EC%8B%9D,_%EB%B0%98%EC%9D%B4%EC%A4%91%EB%B0%A9%EC%8B%9D,_%EB%8B%A8%EB%B0%A9%ED%96%A5%ED%86%B5%EC%8B%A0***
+
+
+## Process
+현재 실행중인 프로그램
+
+### 프로세스 상태
+생성: 프로게스가 생성되었지만, 실행가능한 프로세스 집합에 소속되지 않은 상태(메모리에 적재되지 않은 상태)
+준비: CPU를 할당 받기 위해 준비중인 상태
+실행: CPU를 할당 받아 명령어를 실행중인 상태
+대기: 어떤 사건이 발생하기를 기다리고 있는 상태
+종료: 프로세스가 실행 종료된 상태(메모리에서 해제된 상태)
+
+### 프로세스 컨드롤 블록(PCB)
+PCB는 프로세스와 관련된 정보를 갖는다.
+
+1. Process State
+- Ready, Running, Waiting, Halted
+2. Program Counter
+- 다음에 실행될 명령어 주소
+3. CPU Registers
+- 여러 범용 목적의 레지스터들
+4. CPU Scheduling Information
+- 프로세스의 우선 순위 정보, 스케쥴링 큐
+5. Memory Management Information
+- 페이지 테이블
+6. Accounting Information
+- CPU 사용량, 프로세스의 실제 실행시간 ...
+7. I/O 상태 정보
+- 해당 프로세스에 할당된 디바이스 목록, Open된 파일의 목록 등등
+***출처:
+http://apphappy.tistory.com/115***
+
+## Thread
+스레드는 어떠한 프로그램 내에서, 특히 프로세스 내에서 시행되는 흐름이 단위, 일반적으로 한 프로그램은 하나의 스레드를 가지고 있지만, 프로그램 환경에 따라 둘 이상의 스레드를 동시에 실행 할 수 있다. 이러한 실행 방식을 멀티스레드라고 한다.
+
+프로세스는 독립적으로 실행되며 각각 별개의 메모리를 차지하고 있고, 스레드는 프로세스 내의 메모리를 공유해 사용할 수 있다.
+
+### 스레드의 종류
+#### 사용자 레벨 스레드(User-Level Thread)
+커널 영역 상위에서 지원되며 일반적으로 사용자 레벨의 라이브러리르 통해 구현, 라이브러리에서 스레드의 생성 및 스케줄링 등에 관한 관리 기능을 제공한다. 동일한 메모리 영역에서 스레드가 생성 및 관리되어 속도가 빠르다.
+#### 커널 레벨 스레드(Kernel-Level Thread)
+운영체제가 지원하는 스레드 기능으로 구현되며, 커널이 스레드의 생성 및 스케줄링 등을 관리한다.
+
+***출처:
+https://ko.wikipedia.org/wiki/%EC%8A%A4%EB%A0%88%EB%93%9C***
